@@ -87,7 +87,12 @@
         <nav class="subsystem-nav" aria-label="Subsystem Navigation">
           <ul class="subsystem-list">
             <li>
-              <button type="button" class="subsystem-btn active" data-subsystem="mechanical">
+              <button type="button" class="subsystem-btn active" data-subsystem="all">
+                <kbd>[00]</kbd> ALL
+              </button>
+            </li>
+            <li>
+              <button type="button" class="subsystem-btn" data-subsystem="mechanical">
                 <kbd>[01]</kbd> MECHANICAL
               </button>
             </li>
@@ -118,6 +123,18 @@
             Zero automated LLM queries on page load. Generation triggers solely upon explicit student button dispatch.
           </p>
 
+          <!-- Honest Error Alert Box -->
+          <aside class="stark-alert-box" id="generation-alert" role="alert" hidden>
+            <header class="alert-header">
+              <span class="alert-icon" aria-hidden="true">&#9888;</span>
+              <strong class="alert-title" id="generation-alert-title">GENERATION FAILED</strong>
+            </header>
+            <p class="alert-message" id="generation-alert-message"></p>
+            <button type="button" class="btn-alert-retry" id="btn-retry-generate">RETRY</button>
+          </aside>
+
+          <progress id="generation-progress" class="stark-progress" value="0" max="100" aria-label="Step generation progress" hidden></progress>
+
           <label for="project-title-input" class="stark-label">PROJECT TITLE</label>
           <input type="text" id="project-title-input" name="title" class="stark-input" value="Dual-Axis Solar Tracker Gimbal Assembly" placeholder="e.g., Autonomous Solar Sun-Tracker Gimbal" required>
 
@@ -135,17 +152,18 @@
       <section class="manufacturing-flow" aria-label="Manufacturing Step Reader">
         <header class="section-subhead">
           <h3 class="subhead-title">SEQUENTIAL MANUFACTURING OPERATIONS</h3>
-          <span class="subhead-badge" id="active-subsystem-badge">[ACTIVE SUBSYSTEM: MECHANICAL]</span>
+          <span class="subhead-badge" id="active-subsystem-badge">[ACTIVE SUBSYSTEM: ALL]</span>
         </header>
 
-        <ol class="steps-ordered-list">
+        <ol class="steps-ordered-list" id="steps-ordered-list">
           <!-- Step 1: Normal / Cleared -->
-          <li class="step-card step-cleared" id="step-card-01">
+          <li class="step-card step-cleared" id="step-card-01" data-subsystem="mechanical">
             <article class="step-article">
               <header class="step-header">
                 <span class="step-indicator"><kbd>OP 01</kbd></span>
                 <h4 class="step-title">Stock Preparation &amp; Facing on Clausing Lathe</h4>
                 <span class="facility-badge">[MACHINE_SHOP]</span>
+                <span class="subsystem-badge-pill"><kbd>[MECHANICAL]</kbd></span>
               </header>
               <p class="step-instruction">
                 Chuck 2.00" 6061-T6 round bar stock into 3-jaw chuck. Face both ends flat and turn outer diameter down to 48.00 mm &plusmn; 0.05 mm over 110 mm length. Apply cutting oil and calibrate dial calipers.
@@ -158,12 +176,13 @@
           </li>
 
           <!-- Step 2: Safety Sign-off Lock Required -->
-          <li class="step-card step-locked" id="step-card-02">
+          <li class="step-card step-locked" id="step-card-02" data-subsystem="mechanical">
             <article class="step-article">
               <header class="step-header">
                 <span class="step-indicator"><kbd>OP 02</kbd></span>
                 <h4 class="step-title">Bridgeport Mill Precision Keyway Slotting</h4>
                 <span class="facility-badge">[MACHINE_SHOP]</span>
+                <span class="subsystem-badge-pill"><kbd>[MECHANICAL]</kbd></span>
               </header>
               <p class="step-instruction">
                 Clamp prepared shaft in milling vise with parallels. End mill 6.00 mm keyway slot at 1200 RPM using 4-flute solid carbide center-cutting end mill. Depth of cut 3.50 mm.
@@ -189,12 +208,13 @@
           </li>
 
           <!-- Step 3: Downstream Locked Step -->
-          <li class="step-card step-downstream" id="step-card-03">
+          <li class="step-card step-downstream" id="step-card-03" data-subsystem="mechanical">
             <article class="step-article">
               <header class="step-header">
                 <span class="step-indicator"><kbd>OP 03</kbd></span>
                 <h4 class="step-title">Bearing Press-Fit with Dake Arbor Press</h4>
                 <span class="facility-badge">[MACHINE_SHOP]</span>
+                <span class="subsystem-badge-pill"><kbd>[MECHANICAL]</kbd></span>
               </header>
               <p class="step-instruction">
                 Clean bearing journals with isopropanol. Apply thin film of Loctite 609 retaining compound. Press dual 608-2RS ball bearings into reamed bores using hand arbor press.
@@ -212,7 +232,7 @@
       <section class="bom-section" aria-label="Bill of Materials Checklist">
         <header class="section-subhead">
           <h3 class="subhead-title">BILL OF MATERIALS (BOM) &bull; CAMPUS VS EXTERNAL</h3>
-          <span class="subhead-badge">TOTAL ITEMS: 4</span>
+          <span class="subhead-badge" id="bom-items-count-badge">TOTAL ITEMS: 4</span>
         </header>
 
         <section class="table-container">
@@ -226,7 +246,7 @@
                 <th scope="col">CAMPUS BIN / SKU</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="bom-table-body">
               <tr>
                 <td><strong>6061-T6 Round Bar 2.0" OD</strong></td>
                 <td><kbd>[MECHANICAL]</kbd></td>
@@ -258,6 +278,53 @@
             </tbody>
           </table>
         </section>
+      </section>
+
+      <!-- Conversational Refinement (Chat) -->
+      <section class="copilot-chat-section" aria-label="Project Fabrication Assistant Chat">
+        <header class="section-subhead">
+          <h3 class="subhead-title">CONVERSATIONAL FABRICATION ASSISTANT</h3>
+          <span class="subhead-badge" id="chat-status-badge">[STATUS: READY]</span>
+        </header>
+        <p class="chat-intro-desc">
+          Refine manufacturing steps, inquire about tool selection, speeds &amp; feeds, or discuss safety barriers with the co-pilot.
+        </p>
+
+        <!-- Honest Alert Box for Chat Failures -->
+        <aside class="stark-alert-box chat-alert-box" id="chat-alert-box" role="alert" hidden>
+          <header class="alert-header">
+            <span class="alert-icon" aria-hidden="true">&#9888;</span>
+            <strong class="alert-title" id="chat-alert-title">CHAT QUERY FAILED</strong>
+          </header>
+          <p class="alert-message" id="chat-alert-message"></p>
+          <button type="button" class="btn-alert-retry" id="btn-retry-chat">RETRY</button>
+        </aside>
+
+        <progress id="chat-progress" class="stark-progress" value="0" max="100" aria-label="Chat query progress" hidden></progress>
+
+        <ul class="chat-thread" id="chat-thread-list">
+          <li class="chat-message chat-model">
+            <article class="chat-bubble">
+              <header class="chat-meta">
+                <strong class="chat-author">[ASSISTANT &bull; GEMINI 2.0]</strong>
+                <time class="chat-time">SYSTEM</time>
+              </header>
+              <p class="chat-text">Welcome to the E190 Prototyping Assistant. Submit your specification brief above to decompose into sequential operations, or ask specific technical questions about tooling, tolerances, or safety sign-offs.</p>
+            </article>
+          </li>
+        </ul>
+
+        <form id="chat-form" class="stark-form chat-input-form" onsubmit="return false;">
+          <fieldset class="stark-fieldset chat-fieldset">
+            <legend class="sr-only">Ask Fabrication Assistant</legend>
+            <label for="chat-input" class="stark-label sr-only">YOUR QUESTION</label>
+            <textarea id="chat-input" name="message" class="stark-textarea chat-textarea" rows="2" placeholder="e.g., What feed rate and spindle speed should I use for 6061 aluminum with a 6mm 4-flute carbide mill?" required></textarea>
+            <button type="button" id="btn-send-chat" class="btn-action-primary chat-submit-btn">
+              DISPATCH QUERY &rarr;
+            </button>
+            <p id="chat-action-status" class="action-status-pill chat-status-pill" role="status" aria-live="polite">Chat ready for questions.</p>
+          </fieldset>
+        </form>
       </section>
     </section>
 
