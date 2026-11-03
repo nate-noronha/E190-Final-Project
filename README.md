@@ -1,6 +1,6 @@
 # Hardware & Machining Prototyping Assistant (E190)
 
-A web application designed for student makers and shop stewards to plan hardware prototyping steps, track machining workflows, and manage safety sign-offs.
+A web application designed for student makers and shop stewards to plan hardware prototyping steps, track machining workflows, and manage safety sign-offs. Aimed to help students engage their creative mind without the bottleneck of not knowing how to prototype something.
 
 ## Architecture & Conventions
 

@@ -1,0 +1,28 @@
+# Version control
+.git
+.worktrees
+
+# Python virtual environments
+.venv
+venv
+
+# Python bytecode
+__pycache__
+*.pyc
+.pytest_cache
+
+# Environment files — never bake secrets into the image
+.env
+.env.*
+# Allow the example file if you want it inside the image (optional)
+# !.env.example
+
+# macOS metadata
+.DS_Store
+
+# Test suite — not needed at runtime
+tests
+
+# Project documentation not needed at runtime
+IMPLEMENTATION_PLAN.md
+PROCESS.md
