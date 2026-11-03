@@ -34,7 +34,7 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       SECRET_KEY: ${SECRET_KEY:-change-this-for-local-dev-only}
     ports:
-      - "${PORT:-8000}:8000"
+      - "${PORT:-8000}:${PORT:-8000}"
 
 volumes:
   postgres_data:

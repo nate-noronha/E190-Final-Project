@@ -52,3 +52,12 @@ def health_check():
                 "detail": str(exc),
             },
         )
+    except Exception:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "error",
+                "database": "disconnected",
+                "detail": "Database connection failed",
+            },
+        )
