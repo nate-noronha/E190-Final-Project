@@ -1,13 +1,21 @@
 import logging
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.routers.health import router as health_router
 from app.routers.users import router as users_router
 
 logger = logging.getLogger(__name__)
+
+BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "static"
+TEMPLATES_DIR = BASE_DIR / "templates"
+INDEX_FILE = TEMPLATES_DIR / "index.html"
 
 
 @asynccontextmanager
@@ -42,5 +50,20 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Mount static directory for stylesheets, scripts, and static assets
+app.mount(
+    "/static",
+    StaticFiles(directory=str(STATIC_DIR), html=True),
+    name="static",
+)
+
+# Route index root GET / to pure semantic HTML5 shell
+@app.get("/", response_class=FileResponse)
+async def read_root():
+    """Serve the stark Greek design system and mobile-first semantic HTML5 shell."""
+    return FileResponse(str(INDEX_FILE), media_type="text/html")
+
+
 app.include_router(health_router)
 app.include_router(users_router)
+
