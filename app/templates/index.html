@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Harvey Mudd College E190 Hardware & Machining Prototyping Assistant. Mobile-first semantic system for engineering workflows, safety gates, and stockroom inventory.">
+  <title>ARCHITECT &amp; MAKER &bull; HMC E190 Prototyping Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="/static/js/app.js" defer></script>
+</head>
+<body>
+  <!-- HEADER / ENTABLATURE -->
+  <header class="masthead">
+    <section class="entablature-top">
+      <hgroup class="brand-lockup">
+        <h1 class="brand-title">ARCHITECT &amp; MAKER</h1>
+        <p class="brand-subtitle">HARVEY MUDD COLLEGE &bull; E190 HARDWARE PROTOTYPING</p>
+      </hgroup>
+      <aside class="header-controls" aria-label="System status and role switcher">
+        <span id="connection-pill" class="status-pill status-standby" role="status" aria-live="polite">
+          <span class="pill-dot" aria-hidden="true"></span>
+          <span id="connection-status-text">INITIALIZING</span>
+        </span>
+        <fieldset class="role-switcher-fieldset" role="radiogroup" aria-label="Active Persona Switcher">
+          <legend class="sr-only">Active Persona Switcher</legend>
+          <label class="role-pill active" id="label-role-student" for="role-student">
+            <input type="radio" name="user-role" id="role-student" value="student" checked>
+            <span>[STUDENT]</span>
+          </label>
+          <label class="role-pill" id="label-role-steward" for="role-steward">
+            <input type="radio" name="user-role" id="role-steward" value="steward">
+            <span>[STEWARD]</span>
+          </label>
+        </fieldset>
+      </aside>
+    </section>
+
+    <!-- PRIMARY ARCHITECTURAL NAVIGATION -->
+    <nav class="primary-nav" aria-label="Primary Navigation Tabs">
+      <ul class="nav-tabs-list">
+        <li class="nav-item">
+          <button type="button" class="nav-tab active" data-tab="tab-copilot" id="btn-tab-copilot" aria-controls="tab-copilot" aria-selected="true">
+            <span class="tab-order">I.</span> PROJECT CO-PILOT
+          </button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-tab" data-tab="tab-steward" id="btn-tab-steward" aria-controls="tab-steward" aria-selected="false">
+            <span class="tab-order">II.</span> STEWARD QUEUE <span class="badge-count" id="safety-queue-count">3</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-tab" data-tab="tab-stockroom" id="btn-tab-stockroom" aria-controls="tab-stockroom" aria-selected="false">
+            <span class="tab-order">III.</span> CAMPUS STOCKROOM
+          </button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-tab" data-tab="tab-cad" id="btn-tab-cad" aria-controls="tab-cad" aria-selected="false">
+            <span class="tab-order">IV.</span> 3D CAD PREVIEW
+          </button>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- MAIN VIEWPORT -->
+  <main id="main-content" class="content-stage">
+
+    <!-- ================================================================= -->
+    <!-- TAB 1: PROJECT CO-PILOT (STUDENT VIEW)                           -->
+    <!-- ================================================================= -->
+    <section id="tab-copilot" class="view-panel active" aria-labelledby="btn-tab-copilot">
+      <header class="panel-header">
+        <span class="panel-order-tag">[MODULE: SPECIFICATION &amp; PLANNING]</span>
+        <h2 class="panel-title">PROJECT CO-PILOT &bull; PROTOTYPE DECOMPOSITION</h2>
+        <p class="panel-desc">Formulate engineering requirements into sequential manufacturing steps locked by steward safety sign-offs and verified against campus inventory.</p>
+      </header>
+
+      <!-- Subsystem Selector Bar -->
+      <section class="subsystems-bar" aria-label="Subsystem Filters">
+        <header class="subsystems-bar-header">
+          <h3 class="subsystems-title">ENGINEERING SUBSYSTEMS</h3>
+          <span class="subsystems-caption">FILTER WORKFLOW BY DOMAIN</span>
+        </header>
+        <nav class="subsystem-nav" aria-label="Subsystem Navigation">
+          <ul class="subsystem-list">
+            <li>
+              <button type="button" class="subsystem-btn active" data-subsystem="mechanical">
+                <kbd>[01]</kbd> MECHANICAL
+              </button>
+            </li>
+            <li>
+              <button type="button" class="subsystem-btn" data-subsystem="electrical">
+                <kbd>[02]</kbd> ELECTRICAL
+              </button>
+            </li>
+            <li>
+              <button type="button" class="subsystem-btn" data-subsystem="firmware">
+                <kbd>[03]</kbd> FIRMWARE
+              </button>
+            </li>
+            <li>
+              <button type="button" class="subsystem-btn" data-subsystem="assembly">
+                <kbd>[04]</kbd> ASSEMBLY
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </section>
+
+      <!-- Project Specification Input Form -->
+      <form id="project-form" class="stark-form project-brief-form" onsubmit="return false;">
+        <fieldset class="stark-fieldset">
+          <legend class="stark-legend">PROTOTYPE SPECIFICATION BRIEF</legend>
+          <p class="fieldset-notice">
+            Zero automated LLM queries on page load. Generation triggers solely upon explicit student button dispatch.
+          </p>
+
+          <label for="project-title-input" class="stark-label">PROJECT TITLE</label>
+          <input type="text" id="project-title-input" name="title" class="stark-input" value="Dual-Axis Solar Tracker Gimbal Assembly" placeholder="e.g., Autonomous Solar Sun-Tracker Gimbal" required>
+
+          <label for="project-desc-input" class="stark-label">ENGINEERING CONSTRAINTS &amp; TARGET TOLERANCES</label>
+          <textarea id="project-desc-input" name="description" class="stark-textarea" rows="3" placeholder="Specify machining materials (6061-T6 Aluminum, Delrin, PLA), angular backlash (&plusmn;0.05&deg;), and required machinery...">Machined 6061-T6 aluminum yoke with &plusmn;0.05 mm bearing bores, Bridgeport keyway slotting, 3D printed PETG optical sensor shroud, and dual NEMA 17 stepper drives with TMC2209 silent step sticks.</textarea>
+
+          <button type="button" id="btn-generate-steps" class="btn-action-primary">
+            DECOMPOSE INTO MANUFACTURING PLAN &rarr;
+          </button>
+          <p id="copilot-action-status" class="action-status-pill" role="status" aria-live="polite">Ready for student dispatch.</p>
+        </fieldset>
+      </form>
+
+      <!-- Step Reader with Safety Sign-off Locks -->
+      <section class="manufacturing-flow" aria-label="Manufacturing Step Reader">
+        <header class="section-subhead">
+          <h3 class="subhead-title">SEQUENTIAL MANUFACTURING OPERATIONS</h3>
+          <span class="subhead-badge" id="active-subsystem-badge">[ACTIVE SUBSYSTEM: MECHANICAL]</span>
+        </header>
+
+        <ol class="steps-ordered-list">
+          <!-- Step 1: Normal / Cleared -->
+          <li class="step-card step-cleared" id="step-card-01">
+            <article class="step-article">
+              <header class="step-header">
+                <span class="step-indicator"><kbd>OP 01</kbd></span>
+                <h4 class="step-title">Stock Preparation &amp; Facing on Clausing Lathe</h4>
+                <span class="facility-badge">[MACHINE_SHOP]</span>
+              </header>
+              <p class="step-instruction">
+                Chuck 2.00" 6061-T6 round bar stock into 3-jaw chuck. Face both ends flat and turn outer diameter down to 48.00 mm &plusmn; 0.05 mm over 110 mm length. Apply cutting oil and calibrate dial calipers.
+              </p>
+              <footer class="step-status-footer">
+                <span class="safety-tag safety-normal">&bull; Standard Machine Shop Safety Protocol</span>
+                <span class="gate-status-pill pill-cleared">[STATUS: CLEARED]</span>
+              </footer>
+            </article>
+          </li>
+
+          <!-- Step 2: Safety Sign-off Lock Required -->
+          <li class="step-card step-locked" id="step-card-02">
+            <article class="step-article">
+              <header class="step-header">
+                <span class="step-indicator"><kbd>OP 02</kbd></span>
+                <h4 class="step-title">Bridgeport Mill Precision Keyway Slotting</h4>
+                <span class="facility-badge">[MACHINE_SHOP]</span>
+              </header>
+              <p class="step-instruction">
+                Clamp prepared shaft in milling vise with parallels. End mill 6.00 mm keyway slot at 1200 RPM using 4-flute solid carbide center-cutting end mill. Depth of cut 3.50 mm.
+              </p>
+
+              <!-- Safety Barrier Gate -->
+              <section class="safety-barrier" aria-label="Safety Sign-off Lock">
+                <span class="barrier-warning-symbol" aria-hidden="true">&#9888;</span>
+                <h5 class="barrier-title">STEWARD SAFETY SIGN-OFF REQUIRED BEFORE OPERATION</h5>
+                <p class="barrier-text">
+                  Risk Level: HIGH. High-speed spindle chips and workpiece deflection risk. A certified shop steward must inspect vise fixturing, parallel seating, and RPM configuration before spindle start.
+                </p>
+                <button type="button" class="btn-request-signoff" data-step-id="step-02" data-step-title="Bridgeport Mill Precision Keyway Slotting" data-facility="machine_shop">
+                  REQUEST STEWARD SAFETY SIGN-OFF
+                </button>
+              </section>
+
+              <footer class="step-status-footer">
+                <span class="safety-tag safety-critical">&bull; Safety Gate Active &mdash; Machine Interlocked</span>
+                <span class="gate-status-pill pill-locked" id="step-02-badge">[STATUS: PENDING STEWARD SIGN-OFF]</span>
+              </footer>
+            </article>
+          </li>
+
+          <!-- Step 3: Downstream Locked Step -->
+          <li class="step-card step-downstream" id="step-card-03">
+            <article class="step-article">
+              <header class="step-header">
+                <span class="step-indicator"><kbd>OP 03</kbd></span>
+                <h4 class="step-title">Bearing Press-Fit with Dake Arbor Press</h4>
+                <span class="facility-badge">[MACHINE_SHOP]</span>
+              </header>
+              <p class="step-instruction">
+                Clean bearing journals with isopropanol. Apply thin film of Loctite 609 retaining compound. Press dual 608-2RS ball bearings into reamed bores using hand arbor press.
+              </p>
+              <footer class="step-status-footer">
+                <span class="safety-tag safety-normal">&bull; Standard Mechanical Assembly Protocol</span>
+                <span class="gate-status-pill pill-waiting" id="step-03-badge">[STATUS: AWAITING OP 02 SIGN-OFF]</span>
+              </footer>
+            </article>
+          </li>
+        </ol>
+      </section>
+
+      <!-- Bill of Materials (BOM) Checklist -->
+      <section class="bom-section" aria-label="Bill of Materials Checklist">
+        <header class="section-subhead">
+          <h3 class="subhead-title">BILL OF MATERIALS (BOM) &bull; CAMPUS VS EXTERNAL</h3>
+          <span class="subhead-badge">TOTAL ITEMS: 4</span>
+        </header>
+
+        <section class="table-container">
+          <table class="stark-table" aria-label="BOM Inventory Audit Table">
+            <thead>
+              <tr>
+                <th scope="col">ITEM SPECIFICATION</th>
+                <th scope="col">SUBSYSTEM</th>
+                <th scope="col">REQUIRED</th>
+                <th scope="col">SOURCING STATUS</th>
+                <th scope="col">CAMPUS BIN / SKU</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>6061-T6 Round Bar 2.0" OD</strong></td>
+                <td><kbd>[MECHANICAL]</kbd></td>
+                <td><code>120 mm</code></td>
+                <td><span class="source-tag in-stock">[IN_STOCK_ON_CAMPUS]</span></td>
+                <td><code>BIN: MS-RND-04 &bull; SKU: MS-6061-200</code></td>
+              </tr>
+              <tr>
+                <td><strong>TMC2209 SilentStepStick Driver</strong></td>
+                <td><kbd>[ELECTRICAL]</kbd></td>
+                <td><code>2 pcs</code></td>
+                <td><span class="source-tag in-stock">[IN_STOCK_ON_CAMPUS]</span></td>
+                <td><code>BIN: EE-DRV-12 &bull; SKU: EE-TMC-2209</code></td>
+              </tr>
+              <tr>
+                <td><strong>AS5600 12-Bit Magnetic Rotary Encoder</strong></td>
+                <td><kbd>[ELECTRICAL]</kbd></td>
+                <td><code>1 pc</code></td>
+                <td><span class="source-tag external">[EXTERNAL_PURCHASE_NEEDED]</span></td>
+                <td><em>DigiKey #1568-1248-ND (Lead: 2 Days)</em></td>
+              </tr>
+              <tr>
+                <td><strong>NEMA 17 Stepper Motor 42&times;40mm</strong></td>
+                <td><kbd>[ELECTRICAL]</kbd></td>
+                <td><code>2 pcs</code></td>
+                <td><span class="source-tag in-stock">[IN_STOCK_ON_CAMPUS]</span></td>
+                <td><code>BIN: EE-MOT-08 &bull; SKU: EE-NEMA-17</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </section>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 2: STEWARD SAFETY QUEUE (STEWARD VIEW)                       -->
+    <!-- ================================================================= -->
+    <section id="tab-steward" class="view-panel" aria-labelledby="btn-tab-steward" hidden>
+      <header class="panel-header">
+        <span class="panel-order-tag">[MODULE: SHOP FLOOR OVERSIGHT]</span>
+        <h2 class="panel-title">STEWARD SAFETY QUEUE &bull; AUTHORIZATION DESK</h2>
+        <p class="panel-desc">Review student sign-off requests, inspect tooling setups, and authorize hazardous manufacturing operations across Harvey Mudd shops.</p>
+      </header>
+
+      <!-- Facility Filter Nav -->
+      <nav class="facility-nav" aria-label="Steward Facility Filters">
+        <ul class="facility-filter-list">
+          <li><button type="button" class="facility-pill active" data-queue-filter="all">ALL FACILITIES</button></li>
+          <li><button type="button" class="facility-pill" data-queue-filter="machine_shop">[MACHINE_SHOP]</button></li>
+          <li><button type="button" class="facility-pill" data-queue-filter="wood_shop">[WOOD_SHOP]</button></li>
+          <li><button type="button" class="facility-pill" data-queue-filter="ee_stockroom">[EE_STOCKROOM]</button></li>
+          <li><button type="button" class="facility-pill" data-queue-filter="makerspace">[MAKERSPACE]</button></li>
+        </ul>
+      </nav>
+
+      <!-- Queue Cards List -->
+      <ul class="steward-queue-list" id="steward-queue-container">
+        <!-- Item 1: Machine Shop -->
+        <li class="queue-item" data-facility="machine_shop">
+          <article class="steward-card">
+            <header class="card-header-bar">
+              <span class="facility-badge">[MACHINE_SHOP]</span>
+              <time class="card-timestamp" datetime="2026-11-03T09:15:00Z">09:15 AM TODAY</time>
+            </header>
+            <h3 class="queue-operation-title">Bridgeport Mill Precision Keyway Slotting</h3>
+            <p class="queue-student-meta">
+              Student: <strong>Nathan Noronha</strong> &bull; Project: <em>Sun-Tracker Gimbal</em> &bull; Step: <kbd>OP 02</kbd>
+            </p>
+            <p class="queue-risk-brief">
+              <strong>Risk Hazard:</strong> High-speed carbide end mill, spindle entanglement, and projectile chips in 6061-T6 aluminum. Verify vise torque and eye protection.
+            </p>
+            <footer class="queue-card-actions">
+              <button type="button" class="btn-steward-approve" data-step-id="step-02" data-step-title="Bridgeport Mill Keyway Slotting" data-facility="machine_shop">
+                APPROVE SIGN-OFF
+              </button>
+              <button type="button" class="btn-steward-flag" data-step-id="step-02" data-step-title="Bridgeport Mill Keyway Slotting" data-facility="machine_shop">
+                FLAG FOR REVISION
+              </button>
+            </footer>
+          </article>
+        </li>
+
+        <!-- Item 2: Makerspace -->
+        <li class="queue-item" data-facility="makerspace">
+          <article class="steward-card">
+            <header class="card-header-bar">
+              <span class="facility-badge">[MAKERSPACE]</span>
+              <time class="card-timestamp" datetime="2026-11-03T09:22:00Z">09:22 AM TODAY</time>
+            </header>
+            <h3 class="queue-operation-title">Boss Laser 60W Acrylic Base Plate Cutting</h3>
+            <p class="queue-student-meta">
+              Student: <strong>Elena Rostova</strong> &bull; Project: <em>Spectrometer Enclosure</em> &bull; Step: <kbd>OP 01</kbd>
+            </p>
+            <p class="queue-risk-brief">
+              <strong>Risk Hazard:</strong> Combustible fumes, laser reflection, and honeycomb flare-up. Verify compressed air assist is active and exhaust fan running.
+            </p>
+            <footer class="queue-card-actions">
+              <button type="button" class="btn-steward-approve" data-step-id="step-boss-laser" data-step-title="Boss Laser 60W Acrylic Cut" data-facility="makerspace">
+                APPROVE SIGN-OFF
+              </button>
+              <button type="button" class="btn-steward-flag" data-step-id="step-boss-laser" data-step-title="Boss Laser 60W Acrylic Cut" data-facility="makerspace">
+                FLAG FOR REVISION
+              </button>
+            </footer>
+          </article>
+        </li>
+
+        <!-- Item 3: Wood Shop -->
+        <li class="queue-item" data-facility="wood_shop">
+          <article class="steward-card">
+            <header class="card-header-bar">
+              <span class="facility-badge">[WOOD_SHOP]</span>
+              <time class="card-timestamp" datetime="2026-11-03T09:30:00Z">09:30 AM TODAY</time>
+            </header>
+            <h3 class="queue-operation-title">SawStop Cabinet Table Saw Ripping</h3>
+            <p class="queue-student-meta">
+              Student: <strong>Marcus Vance</strong> &bull; Project: <em>Acoustic Resonator Frame</em> &bull; Step: <kbd>OP 04</kbd>
+            </p>
+            <p class="queue-risk-brief">
+              <strong>Risk Hazard:</strong> High kinetic energy blade and kickback risk. Confirm riving knife installed, push stick ready, and blade guard in place.
+            </p>
+            <footer class="queue-card-actions">
+              <button type="button" class="btn-steward-approve" data-step-id="step-sawstop" data-step-title="SawStop Table Saw Ripping" data-facility="wood_shop">
+                APPROVE SIGN-OFF
+              </button>
+              <button type="button" class="btn-steward-flag" data-step-id="step-sawstop" data-step-title="SawStop Table Saw Ripping" data-facility="wood_shop">
+                FLAG FOR REVISION
+              </button>
+            </footer>
+          </article>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 3: CAMPUS STOCKROOM (INVENTORY BROWSER)                      -->
+    <!-- ================================================================= -->
+    <section id="tab-stockroom" class="view-panel" aria-labelledby="btn-tab-stockroom" hidden>
+      <header class="panel-header">
+        <span class="panel-order-tag">[MODULE: PHYSICAL RESOURCE INVENTORY]</span>
+        <h2 class="panel-title">CAMPUS STOCKROOM &bull; SHELF CATALOG</h2>
+        <p class="panel-desc">Browse on-hand components, raw metal stock, fasteners, and microcontrollers across Harvey Mudd prototyping facilities.</p>
+      </header>
+
+      <!-- Inventory Search & Facility Filter Form -->
+      <form class="stark-form inventory-filter-form" onsubmit="return false;">
+        <fieldset class="stark-fieldset">
+          <legend class="stark-legend">STOCKROOM SEARCH &amp; FACILITY FILTER</legend>
+          <label for="inventory-search-input" class="stark-label">KEYWORD SEARCH (SKU, NAME, OR BIN LOCATION)</label>
+          <input type="search" id="inventory-search-input" class="stark-input" placeholder="Type e.g., '6061', 'TMC', 'acrylic', or 'MS-RND'...">
+
+          <label for="facility-select-dropdown" class="stark-label">FACILITY SELECTOR</label>
+          <select id="facility-select-dropdown" class="stark-select">
+            <option value="all">ALL CAMPUS FACILITIES</option>
+            <option value="machine_shop">[MACHINE_SHOP] Machine Shop</option>
+            <option value="wood_shop">[WOOD_SHOP] Wood Shop</option>
+            <option value="ee_stockroom">[EE_STOCKROOM] EE Stockroom</option>
+            <option value="makerspace">[MAKERSPACE] Makerspace</option>
+          </select>
+        </fieldset>
+      </form>
+
+      <!-- Inventory Items List -->
+      <ul class="inventory-grid" id="inventory-grid-list">
+        <!-- 1. Machine Shop Item -->
+        <li class="inventory-item-card" data-facility="machine_shop">
+          <article class="stock-card">
+            <header class="stock-header">
+              <span class="facility-badge">[MACHINE_SHOP]</span>
+              <code class="stock-sku">SKU: MS-6061-200</code>
+            </header>
+            <h3 class="stock-title">6061-T6 Aluminum Round Bar 2.00" OD</h3>
+            <p class="stock-location">
+              LOCATION: <kbd>BIN: MS-RND-04</kbd> &bull; RACK: <strong>North Metal Bay</strong>
+            </p>
+            <footer class="stock-footer">
+              <span class="stock-count">AVAILABLE: <strong>18</strong> pcs (120 mm cut-offs)</span>
+              <span class="source-tag in-stock">[ON_HAND]</span>
+            </footer>
+          </article>
+        </li>
+
+        <!-- 2. Machine Shop Fasteners -->
+        <li class="inventory-item-card" data-facility="machine_shop">
+          <article class="stock-card">
+            <header class="stock-header">
+              <span class="facility-badge">[MACHINE_SHOP]</span>
+              <code class="stock-sku">SKU: MS-M4-07-HEX</code>
+            </header>
+            <h3 class="stock-title">M4&times;0.70 Flanged Socket Head Cap Screws</h3>
+            <p class="stock-location">
+              LOCATION: <kbd>BIN: MS-FAST-14</kbd> &bull; CABINET: <strong>Fastener Tower B</strong>
+            </p>
+            <footer class="stock-footer">
+              <span class="stock-count">AVAILABLE: <strong>320</strong> pcs</span>
+              <span class="source-tag in-stock">[ON_HAND]</span>
+            </footer>
+          </article>
+        </li>
+
+        <!-- 3. EE Stockroom Stepper Driver -->
+        <li class="inventory-item-card" data-facility="ee_stockroom">
+          <article class="stock-card">
+            <header class="stock-header">
+              <span class="facility-badge">[EE_STOCKROOM]</span>
+              <code class="stock-sku">SKU: EE-TMC-2209</code>
+            </header>
+            <h3 class="stock-title">TMC2209 SilentStepStick Stepper Driver</h3>
+            <p class="stock-location">
+              LOCATION: <kbd>BIN: EE-DRV-12</kbd> &bull; DRAWER: <strong>Motor Controllers</strong>
+            </p>
+            <footer class="stock-footer">
+              <span class="stock-count">AVAILABLE: <strong>45</strong> pcs</span>
+              <span class="source-tag in-stock">[ON_HAND]</span>
+            </footer>
+          </article>
+        </li>
+
+        <!-- 4. EE Stockroom ESP32-S3 -->
+        <li class="inventory-item-card" data-facility="ee_stockroom">
+          <article class="stock-card">
+            <header class="stock-header">
+              <span class="facility-badge">[EE_STOCKROOM]</span>
+              <code class="stock-sku">SKU: EE-ESP32-S3</code>
+            </header>
+            <h3 class="stock-title">ESP32-S3 Dual-Core Xtensa MCU Board</h3>
+            <p class="stock-location">
+              LOCATION: <kbd>BIN: EE-DEV-03</kbd> &bull; DRAWER: <strong>Microcontrollers</strong>
+            </p>
+            <footer class="stock-footer">
+              <span class="stock-count">AVAILABLE: <strong>24</strong> pcs</span>
+              <span class="source-tag in-stock">[ON_HAND]</span>
+            </footer>
+          </article>
+        </li>
+
+        <!-- 5. Makerspace Acrylic -->
+        <li class="inventory-item-card" data-facility="makerspace">
+          <article class="stock-card">
+            <header class="stock-header">
+              <span class="facility-badge">[MAKERSPACE]</span>
+              <code class="stock-sku">SKU: MK-ACR-250</code>
+            </header>
+            <h3 class="stock-title">1/4" Cast Clear Acrylic Sheet 12"&times;24"</h3>
+            <p class="stock-location">
+              LOCATION: <kbd>BIN: MK-ACR-01</kbd> &bull; VERTICAL: <strong>Laser Materials Rack</strong>
+            </p>
+            <footer class="stock-footer">
+              <span class="stock-count">AVAILABLE: <strong>16</strong> sheets</span>
+              <span class="source-tag in-stock">[ON_HAND]</span>
+            </footer>
+          </article>
+        </li>
+
+        <!-- 6. Wood Shop Birch Plywood -->
+        <li class="inventory-item-card" data-facility="wood_shop">
+          <article class="stock-card">
+            <header class="stock-header">
+              <span class="facility-badge">[WOOD_SHOP]</span>
+              <code class="stock-sku">SKU: WS-PLY-34BB</code>
+            </header>
+            <h3 class="stock-title">3/4" Baltic Birch Plywood Sheet 24"&times;48"</h3>
+            <p class="stock-location">
+              LOCATION: <kbd>BIN: WS-PLY-02</kbd> &bull; RACK: <strong>Sheet Stock Bay 1</strong>
+            </p>
+            <footer class="stock-footer">
+              <span class="stock-count">AVAILABLE: <strong>12</strong> sheets</span>
+              <span class="source-tag in-stock">[ON_HAND]</span>
+            </footer>
+          </article>
+        </li>
+      </ul>
+
+      <!-- Placeholder Architecture for Bulk CSV Uploads -->
+      <aside class="stark-placeholder-card" aria-label="Bulk Inventory Upload Placeholder">
+        <header class="placeholder-header">
+          <span class="placeholder-tag">[DIRECTIVE &bull; PENDING INTEGRATION]</span>
+          <h4 class="placeholder-title">BULK CSV INVENTORY UPLOAD MODULE</h4>
+        </header>
+        <p class="placeholder-text">
+          Architecture reservation for shop stewards to perform bulk batch sync of stockroom CSV spreadsheets directly into PostgreSQL. Schema hooks prepared in <code>app/models/domain.py</code>.
+        </p>
+      </aside>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 4: 3D CAD PREVIEW (CLASSMATE TOOL INTEGRATION HARNESS)       -->
+    <!-- ================================================================= -->
+    <section id="tab-cad" class="view-panel" aria-labelledby="btn-tab-cad" hidden>
+      <header class="panel-header">
+        <span class="panel-order-tag">[MODULE: 3D VISUALIZATION HARNESS]</span>
+        <h2 class="panel-title">CLASSMATE CAD PREVIEW &bull; INTEGRATION HARNESS</h2>
+        <p class="panel-desc">Dedicated WebGL / Three.js viewport harness prepared for seamless docking of classmate 3D visualization and CAD analysis micro-tool.</p>
+      </header>
+
+      <figure class="cad-display-frame">
+        <section class="cad-canvas-mockup" id="cad-canvas-box" aria-label="3D Model Viewport">
+          <span class="cad-crosshair-center" aria-hidden="true">+</span>
+          <span class="cad-axis-triad" aria-hidden="true">
+            <kbd class="axis-x">X</kbd>
+            <kbd class="axis-y">Y</kbd>
+            <kbd class="axis-z">Z</kbd>
+          </span>
+          <code class="cad-telemetry-tag">[RENDER_STATUS: STANDBY &bull; THREE.JS_DOCK_READY &bull; ORTHOGRAPHIC]</code>
+          <p class="cad-prompt-text">Awaiting 3D STEP / STL / GLTF Model Stream from CAD Subsystem</p>
+        </section>
+        <figcaption class="cad-caption">
+          <strong>FIGURE 1.1:</strong> 3D CAD preview integration boundary. Designed to accept postMessage or iframe event bus from classmate geometry analyzer.
+        </figcaption>
+      </figure>
+
+      <aside class="cad-metadata-table-card" aria-label="Geometric Telemetry">
+        <h3 class="metadata-title">GEOMETRIC TELEMETRY &amp; INTERFERENCE AUDIT</h3>
+        <table class="stark-table" aria-label="CAD Telemetry Table">
+          <thead>
+            <tr>
+              <th scope="col">METRIC</th>
+              <th scope="col">COMPUTED VALUE</th>
+              <th scope="col">DESIGN LIMIT</th>
+              <th scope="col">VERIFICATION</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">BOUNDING ENVELOPE</th>
+              <td><code>140.0 &times; 85.0 &times; 62.5 mm</code></td>
+              <td><code>150.0 &times; 100.0 &times; 100.0 mm</code></td>
+              <td><span class="source-tag in-stock">[WITHIN_BOUNDS]</span></td>
+            </tr>
+            <tr>
+              <th scope="row">ESTIMATED MASS</th>
+              <td><code>312.4 grams (Al + PETG)</code></td>
+              <td><code>500.0 grams max</code></td>
+              <td><span class="source-tag in-stock">[PASS]</span></td>
+            </tr>
+            <tr>
+              <th scope="row">TOOL CLEARANCE</th>
+              <td><code>12.5 mm spindle clearance</code></td>
+              <td><code>8.0 mm min</code></td>
+              <td><span class="source-tag in-stock">[NO_COLLISION]</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </aside>
+    </section>
+
+  </main>
+
+  <!-- =================================================================== -->
+  <!-- NATIVE SEMANTIC MODAL DIALOG: SAFETY SIGN-OFF                      -->
+  <!-- =================================================================== -->
+  <dialog id="safety-modal" class="stark-dialog" aria-labelledby="dialog-heading">
+    <form method="dialog" class="dialog-form" id="dialog-signoff-form">
+      <header class="dialog-header">
+        <span class="dialog-badge">[STEWARD SHOP SAFETY CLEARANCE]</span>
+        <h3 id="dialog-heading" class="dialog-title">AUTHORIZE MACHINING OPERATION</h3>
+        <button type="button" class="btn-dialog-close" id="btn-dialog-close" aria-label="Close dialog">&times;</button>
+      </header>
+
+      <section class="dialog-body">
+        <article class="dialog-target-summary">
+          <h4 class="dialog-target-title" id="dialog-step-title">Bridgeport Mill Precision Keyway Slotting</h4>
+          <span class="facility-badge" id="dialog-facility-badge">[MACHINE_SHOP]</span>
+        </article>
+
+        <fieldset class="stark-fieldset checklist-box">
+          <legend class="stark-legend">MANDATORY PRE-OPERATION SAFETY VERIFICATION</legend>
+          <label class="check-item-label" for="chk-ppe">
+            <input type="checkbox" id="chk-ppe" required>
+            <span>Personal Protective Equipment (ANSI Z87.1 glasses, closed-toe shoes, hair tied)</span>
+          </label>
+          <label class="check-item-label" for="chk-fixture">
+            <input type="checkbox" id="chk-fixture" required>
+            <span>Vise fixturing, parallel seating, and clamping torque physically inspected</span>
+          </label>
+          <label class="check-item-label" for="chk-speeds">
+            <input type="checkbox" id="chk-speeds" required>
+            <span>Spindle speed (RPM) and feed rate verified for workpiece material</span>
+          </label>
+          <label class="check-item-label" for="chk-estop">
+            <input type="checkbox" id="chk-estop" required>
+            <span>Emergency Stop (E-Stop) switch location and functionality confirmed</span>
+          </label>
+        </fieldset>
+
+        <label for="dialog-steward-notes" class="stark-label">STEWARD VERIFICATION LOG &amp; INSTRUCTIONS</label>
+        <textarea id="dialog-steward-notes" class="stark-textarea" rows="3" placeholder="Enter fixture inspection notes, student badge number, or required tooling adjustments..."></textarea>
+      </section>
+
+      <footer class="dialog-footer">
+        <button type="button" class="btn-action-cancel" id="btn-dialog-cancel">CANCEL</button>
+        <button type="submit" class="btn-action-primary" id="btn-dialog-confirm">
+          AUTHORIZE &amp; UNLOCK STEP
+        </button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- =================================================================== -->
+  <!-- COLOPHON FOOTER                                                     -->
+  <!-- =================================================================== -->
+  <footer class="colophon-footer">
+    <section class="colophon-main">
+      <h4 class="colophon-heading">HARVEY MUDD COLLEGE &bull; DEPARTMENT OF ENGINEERING</h4>
+      <p class="colophon-lead">
+        E190 Prototyping Assistant &bull; Built to strict utilitarian, semantic HTML5, and mobile-first principles.
+      </p>
+      <nav class="footer-nav" aria-label="Footer Quick Links">
+        <ul class="footer-links-list">
+          <li><a href="#tab-copilot" class="footer-link">Directives</a></li>
+          <li><a href="/health" class="footer-link">System Health API</a></li>
+          <li><a href="/api/users" class="footer-link">Users Endpoint</a></li>
+          <li><a href="#safety-disclaimer" class="footer-link">Safety Notice</a></li>
+        </ul>
+      </nav>
+      <small id="safety-disclaimer" class="colophon-disclaimer">
+        SAFETY NOTICE: This prototyping assistant is an assistive planning tool. It does NOT replace official Harvey Mudd machine shop training, stewarding supervision, or physical machine interlocks. Always obtain in-person steward sign-off before operating hazardous machinery.
+      </small>
+    </section>
+  </footer>
+</body>
+</html>

@@ -56,3 +56,39 @@ This document records architectural decisions, test verification results, user i
 - **Next Steps**:
   - Open and merge PR #3 for Slice 1.
   - Proceed to **Slice 2: Stark Greek Design System & Mobile-First Semantic Shell**.
+
+---
+
+## [Slice 2] Stark Greek Design System & Mobile-First Semantic Shell
+- **Date**: 2026-11-03
+- **Agents Involved**:
+  - `Frontend Artisan` (Gemini subagent)
+  - `Lead Orchestrator` (Antigravity Coordinator)
+- **Actions Taken**:
+  - Engineered zero-`<div>` semantic HTML5 application shell (`app/templates/index.html`):
+    - Strict semantic tag architecture using `<header>`, `<nav>`, `<main>`, `<section>`, `<article>`, `<aside>`, `<dialog>`, `<figure>`, `<figcaption>`, `<ul>`, `<li>`, `<form>`, `<fieldset>`, `<legend>`, `<label>`, `<input>`, `<textarea>`, `<button>`, `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>`, `<code>`, `<kbd>`, `<time>`, `<span>`, `<strong>`, `<em>`, `<p>`, `<h1>`-`<h6>`.
+    - Exactly 0 `<div>` or `</div>` tags verified across the entire markup.
+    - Entablature header with brand title ("ARCHITECT & MAKER", Harvey Mudd College E190), connection status pill (`ONLINE • POSTGRES OK`), and accessible Student vs Steward role switcher.
+    - Architectural 4-tab primary navigation: "Project Co-Pilot" (Student workflow), "Steward Safety Queue" (Shop floor sign-offs), "Campus Stockroom" (Inventory catalog), and "3D CAD Preview" (Classmate tool integration harness).
+    - Sequential manufacturing step reader featuring interlocked steward safety sign-off gates and visual hazard barriers.
+    - Bill of Materials (BOM) tabular checklist auditing campus shelf stock vs external procurement.
+    - Steward safety queue with real-time facility filtering across Machine Shop, Wood Shop, EE Stockroom, and Makerspace.
+    - Native HTML5 `<dialog id="safety-modal">` for steward physical fixture inspections, PPE validation, and sign-off authorization.
+  - Implemented Stark Rustic Black-and-White Greek Design System (`app/static/css/style.css`):
+    - Pure #000000 and #FFFFFF utilitarian palette with stark high-contrast borders (1px/2px solid black, 3px double entablature frieze rule).
+    - Classical serif typography (Cormorant Garamond, Playfair Display, EB Garamond, Georgia) for architectural headers paired with crisp technical monospacing for tolerances, SKUs, and facility badges (`[EE_STOCKROOM]`, `[MACHINE_SHOP]`, `[WOOD_SHOP]`, `[MAKERSPACE]`).
+    - Mobile-first responsiveness strictly targeting phone width (320px–390px) with touch targets >= 44px for shop stewards walking around machine shop floors.
+  - Developed vanilla client interaction script (`app/static/js/app.js`):
+    - Strict enforcement of ZERO LLM calls on page load (DOMContentLoaded only pings `GET /health` to update connection status pill).
+    - Accessible tab navigation, dynamic role switcher toggle, interactive subsystem filters, native modal `showModal()` / `close()` handling, and live inventory search/filter.
+  - Integrated static file mounting and root route in `app/main.py`:
+    - Mounted `/static` directory via `StaticFiles(directory=str(STATIC_DIR), html=True)`.
+    - Route `GET /` serves `app/templates/index.html` with Content-Type `text/html`.
+  - Authored comprehensive frontend test suite (`tests/frontend/test_semantic_ui.py`):
+    - 13 automated tests verifying zero `<div>` tags, all required semantic landmarks, mobile-first `<meta name="viewport">`, HTTP 200 `text/html`, zero LLM calls on page load, static asset reachability, and CSS design system compliance.
+- **Verification**:
+    - All 13 frontend tests passed.
+    - Full test suite (43 tests: 30 backend persistence + 13 frontend semantic UI) passing in 0.82s.
+- **Next Steps**:
+    - Commit on branch `slice-2-frontend-shell` and submit report.
+
