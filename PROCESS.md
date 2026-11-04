@@ -174,4 +174,24 @@ This document records architectural decisions, test verification results, user i
 - **Next Steps**:
   - Create focused PR #6 for human review.
 
+---
+
+## 2026-11-04: UI Branch Experiment — ChatGPT 3-Column Layout + Watts Palette & Collapsible Subsystems Drawer
+
+- **Branch**: `ui/chatgpt-watts-layout` (branched from `feature/slices-4-5-6-complete` so both UI variants remain independently testable)
+- **Agents Involved**:
+  - `Lead Orchestrator` (Antigravity Coordinator)
+  - `Frontend Artisan` (`frontend-artisan` subagent — semantic HTML/CSS/JS redesign)
+  - `AGY-Auditor` (`qa-auditor` subagent — independent directive & test suite verification)
+- **Design Goals & User Feedback**:
+  - Following user feedback that the original multi-tab dashboard felt cluttered when all subsystem boxes and tools were constantly visible, we created a second UI branch modeled after **ChatGPT's familiar layout** paired with the warm, high-contrast **Watts** aesthetic:
+    1. **Left Panel (`#projects-sidebar`)**: Persistent sidebar in warm stone (`#F5F3EE`) hosting the chunky `maker.` brand header, primary terracotta `+ New Project` button (`#C83E0B`), project history list (`#projects-history-list`), and bottom role/account switcher (`Student` vs. `Steward`).
+    2. **Center Frame (`#main-content`, `#center-response-frame`)**: Clean, distraction-free bone-white (`#FAF9F6`) reading and conversation feed showing the `"Ready when you are."` welcome state, sequential manufacturing execution steps (`#steps-ordered-list`), and AI Co-Pilot Q&A responses (`#chat-thread-list`).
+    3. **Bottom Chat Bar (`#chat-form.chatgpt-prompt-bar`)**: Floating pill prompt bar docked at the bottom of the center frame with a `+` drawer toggle for detailed project parameters, prompt input, `"Decompose Plan"` quick button, and circular send arrow.
+    4. **Right Expandable Subsystems & Tools Panel (`#right-tools-drawer.sidebar-right.is-collapsed`)**: **Collapsed by default** so students only see it when needed. Clicking `Subsystems & Tools` in the top-right header expands the drawer to reveal Subsystem Filter Boxes (`Mechanical`, `Electrical`, `Firmware`, `Assembly`), Bill of Materials (`#bom-table-body`), Steward Safety Queue (`#tab-steward`), Campus Stockroom & CSV Import (`#tab-stockroom`), and 3D CAD Preview (`#tab-cad`).
+- **Verification**:
+  - Independent `AGY-Auditor` verification: **VERDICT PASS** (`0` `<div>` tags in `index.html` and `app.js`, `0` page-load LLM calls, all semantic landmarks and safety gate workflows preserved).
+  - Full test suite: **90/90 tests passing** (`pytest -v`).
+
+
 

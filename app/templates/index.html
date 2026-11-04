@@ -3,120 +3,167 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Harvey Mudd College E190 Hardware & Machining Prototyping Assistant. Mobile-first semantic system for engineering workflows, safety gates, and stockroom inventory.">
-  <title>ARCHITECT &amp; MAKER &bull; HMC E190 Prototyping Assistant</title>
+  <meta name="description" content="Harvey Mudd College E190 Hardware & Machining Prototyping Assistant. Clean ChatGPT-style workspace with Watts typography for engineering workflows, safety gates, and stockroom inventory.">
+  <title>maker. &bull; HMC E190 Prototyping Assistant</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/style.css">
   <script src="/static/js/app.js" defer></script>
 </head>
-<body>
-  <!-- HEADER / ENTABLATURE -->
-  <header class="masthead">
-    <section class="entablature-top">
-      <hgroup class="brand-lockup">
-        <h1 class="brand-title">ARCHITECT &amp; MAKER</h1>
-        <p class="brand-subtitle">HARVEY MUDD COLLEGE &bull; E190 HARDWARE PROTOTYPING</p>
-      </hgroup>
-      <aside class="header-controls" aria-label="System status and role switcher">
-        <span id="connection-pill" class="status-pill status-standby" role="status" aria-live="polite">
-          <span class="pill-dot" aria-hidden="true"></span>
-          <span id="connection-status-text">INITIALIZING</span>
-        </span>
-        <fieldset class="role-switcher-fieldset" role="radiogroup" aria-label="Active Persona Switcher">
-          <legend class="sr-only">Active Persona Switcher</legend>
-          <label class="role-pill active" id="label-role-student" for="role-student">
-            <input type="radio" name="user-role" id="role-student" value="student" checked>
-            <span>[STUDENT]</span>
-          </label>
-          <label class="role-pill" id="label-role-steward" for="role-steward">
-            <input type="radio" name="user-role" id="role-steward" value="steward">
-            <span>[STEWARD]</span>
-          </label>
-        </fieldset>
-      </aside>
-    </section>
+<body class="app-shell">
 
-    <!-- PRIMARY ARCHITECTURAL NAVIGATION -->
-    <nav class="primary-nav" aria-label="Primary Navigation Tabs">
-      <ul class="nav-tabs-list">
-        <li class="nav-item">
-          <button type="button" class="nav-tab active" data-tab="tab-copilot" id="btn-tab-copilot" aria-controls="tab-copilot" aria-selected="true">
-            <span class="tab-order">I.</span> PROJECT CO-PILOT
+  <!-- =================================================================== -->
+  <!-- LEFT PANEL: CHATGPT-STYLE PROJECTS SIDEBAR                          -->
+  <!-- =================================================================== -->
+  <aside id="projects-sidebar" class="sidebar-left" aria-label="Projects and Workspace Navigation">
+    <header class="sidebar-brand-header">
+      <section class="brand-top-row">
+        <hgroup class="brand-lockup">
+          <h1 class="brand-title">maker<span class="brand-dot">.</span></h1>
+          <p class="brand-subtitle">HMC E190 PROTOTYPING</p>
+        </hgroup>
+        <span class="watts-pill-tag">HMC E190</span>
+      </section>
+
+      <button type="button" id="btn-new-project" class="btn-new-project">
+        <span class="new-proj-icon" aria-hidden="true">+</span>
+        <span>New Project</span>
+      </button>
+    </header>
+
+    <nav class="projects-list-nav" aria-label="Saved Projects">
+      <header class="sidebar-section-header">
+        <h2 class="sidebar-section-title">PROJECTS</h2>
+        <button type="button" id="btn-refresh-projects" class="btn-sync-projects" title="Sync projects from database" aria-label="Sync projects from database">&#8635; Sync</button>
+      </header>
+
+      <ul id="projects-history-list" class="projects-history-list">
+        <li class="project-nav-item active" data-project-preset="solar-tracker">
+          <button type="button" class="project-select-btn" data-preset-key="solar-tracker">
+            <span class="project-item-title">Dual-Axis Solar Tracker Gimbal</span>
+            <span class="project-item-meta"><kbd>3 OPS</kbd> &bull; [MACHINE_SHOP]</span>
           </button>
         </li>
-        <li class="nav-item">
-          <button type="button" class="nav-tab" data-tab="tab-steward" id="btn-tab-steward" aria-controls="tab-steward" aria-selected="false">
-            <span class="tab-order">II.</span> STEWARD QUEUE <span class="badge-count" id="safety-queue-count">3</span>
+        <li class="project-nav-item" data-project-preset="pendulum-cart">
+          <button type="button" class="project-select-btn" data-preset-key="pendulum-cart">
+            <span class="project-item-title">Inverted Pendulum Linear Cart</span>
+            <span class="project-item-meta"><kbd>3 OPS</kbd> &bull; [EE_STOCKROOM]</span>
           </button>
         </li>
-        <li class="nav-item">
-          <button type="button" class="nav-tab" data-tab="tab-stockroom" id="btn-tab-stockroom" aria-controls="tab-stockroom" aria-selected="false">
-            <span class="tab-order">III.</span> CAMPUS STOCKROOM
-          </button>
-        </li>
-        <li class="nav-item">
-          <button type="button" class="nav-tab" data-tab="tab-cad" id="btn-tab-cad" aria-controls="tab-cad" aria-selected="false">
-            <span class="tab-order">IV.</span> 3D CAD PREVIEW
+        <li class="project-nav-item" data-project-preset="auv-hull">
+          <button type="button" class="project-select-btn" data-preset-key="auv-hull">
+            <span class="project-item-title">Autonomous AUV Pressure Hull</span>
+            <span class="project-item-meta"><kbd>3 OPS</kbd> &bull; [MAKERSPACE]</span>
           </button>
         </li>
       </ul>
     </nav>
-  </header>
 
-  <!-- MAIN VIEWPORT -->
-  <main id="main-content" class="content-stage">
-
-    <!-- ================================================================= -->
-    <!-- TAB 1: PROJECT CO-PILOT (STUDENT VIEW)                           -->
-    <!-- ================================================================= -->
-    <section id="tab-copilot" class="view-panel active" aria-labelledby="btn-tab-copilot">
-      <header class="panel-header">
-        <span class="panel-order-tag">[MODULE: SPECIFICATION &amp; PLANNING]</span>
-        <h2 class="panel-title">PROJECT CO-PILOT &bull; PROTOTYPE DECOMPOSITION</h2>
-        <p class="panel-desc">Formulate engineering requirements into sequential manufacturing steps locked by steward safety sign-offs and verified against campus inventory.</p>
-      </header>
-
-      <!-- Subsystem Selector Bar -->
-      <section class="subsystems-bar" aria-label="Subsystem Filters">
-        <header class="subsystems-bar-header">
-          <h3 class="subsystems-title">ENGINEERING SUBSYSTEMS</h3>
-          <span class="subsystems-caption">FILTER WORKFLOW BY DOMAIN</span>
-        </header>
-        <nav class="subsystem-nav" aria-label="Subsystem Navigation">
-          <ul class="subsystem-list">
-            <li>
-              <button type="button" class="subsystem-btn active" data-subsystem="all">
-                <kbd>[00]</kbd> ALL
-              </button>
-            </li>
-            <li>
-              <button type="button" class="subsystem-btn" data-subsystem="mechanical">
-                <kbd>[01]</kbd> MECHANICAL
-              </button>
-            </li>
-            <li>
-              <button type="button" class="subsystem-btn" data-subsystem="electrical">
-                <kbd>[02]</kbd> ELECTRICAL
-              </button>
-            </li>
-            <li>
-              <button type="button" class="subsystem-btn" data-subsystem="firmware">
-                <kbd>[03]</kbd> FIRMWARE
-              </button>
-            </li>
-            <li>
-              <button type="button" class="subsystem-btn" data-subsystem="assembly">
-                <kbd>[04]</kbd> ASSEMBLY
-              </button>
-            </li>
-          </ul>
-        </nav>
+    <footer class="sidebar-footer">
+      <section class="sidebar-status-row" aria-label="Backend Connection Status">
+        <span id="connection-pill" class="status-pill status-standby" role="status" aria-live="polite">
+          <span class="pill-dot" aria-hidden="true"></span>
+          <span id="connection-status-text">INITIALIZING</span>
+        </span>
       </section>
 
-      <!-- Project Specification Input Form -->
-      <form id="project-form" class="stark-form project-brief-form" onsubmit="return false;">
+      <fieldset class="role-switcher-fieldset" role="radiogroup" aria-label="Active Persona Switcher">
+        <legend class="sr-only">Active Persona Switcher</legend>
+        <label class="role-pill active" id="label-role-student" for="role-student">
+          <input type="radio" name="user-role" id="role-student" value="student" checked>
+          <span>[STUDENT]</span>
+        </label>
+        <label class="role-pill" id="label-role-steward" for="role-steward">
+          <input type="radio" name="user-role" id="role-steward" value="steward">
+          <span>[STEWARD]</span>
+        </label>
+      </fieldset>
+
+      <nav class="footer-nav" aria-label="Quick System Links">
+        <ul class="footer-links-list">
+          <li><a href="/health" class="footer-link">Health API</a></li>
+          <li><a href="/api/users" class="footer-link">Users</a></li>
+          <li><a href="#safety-disclaimer" class="footer-link">Safety</a></li>
+        </ul>
+      </nav>
+      <small id="safety-disclaimer" class="colophon-disclaimer">
+        Always obtain in-person steward sign-off before operating hazardous shop machinery.
+      </small>
+    </footer>
+  </aside>
+
+  <!-- =================================================================== -->
+  <!-- CENTER WORKSPACE: RESPONSE STREAM + BOTTOM DOCKED CHAT BAR          -->
+  <!-- =================================================================== -->
+  <main id="main-content" class="center-workspace">
+
+    <!-- WORKSPACE TOP BAR -->
+    <header class="workspace-topbar">
+      <section class="topbar-left">
+        <button type="button" id="btn-toggle-sidebar" class="btn-topbar-icon" aria-label="Toggle Projects Sidebar" aria-expanded="true" title="Toggle Projects Sidebar">
+          &#9776;
+        </button>
+        <span id="topbar-project-title" class="topbar-project-title">Dual-Axis Solar Tracker Gimbal Assembly</span>
+      </section>
+
+      <nav class="center-view-switcher" aria-label="Workspace View Switcher">
+        <ul class="segmented-pill-list">
+          <li>
+            <button type="button" class="seg-pill active" id="btn-view-stream" data-center-view="stream">
+              Chat &amp; Steps
+            </button>
+          </li>
+          <li>
+            <button type="button" class="seg-pill" id="btn-view-brief" data-center-view="brief">
+              Project Brief
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <section class="topbar-right">
+        <button type="button" id="btn-toggle-right-drawer" class="btn-drawer-toggle" aria-expanded="false" aria-controls="right-tools-drawer">
+          <span class="drawer-toggle-label">Subsystems &amp; Shop Tools</span>
+          <span class="badge-count" id="safety-queue-count">3</span>
+        </button>
+      </section>
+    </header>
+
+    <!-- SCROLLABLE CENTER STREAM -->
+    <section class="center-response-frame" id="center-response-frame" aria-label="Project Response and Operations Stream">
+
+      <!-- WATTS-STYLE HERO / STARTER SECTION -->
+      <section id="welcome-hero" class="welcome-hero" aria-label="Workspace Welcome">
+        <span class="watts-eyebrow-pill">HARVEY MUDD COLLEGE &bull; E190 SHOP CO-PILOT</span>
+        <h2 class="watts-hero-heading">Ready when you are.</h2>
+        <p class="watts-hero-sub">
+          Describe your hardware prototype below to decompose sequential shop operations, audit campus stockroom availability, or ask technical questions about feeds, speeds, and safety locks.
+        </p>
+        <ul class="starter-chips-list" aria-label="Starter Prototype Prompts">
+          <li>
+            <button type="button" class="starter-chip" data-starter-title="Dual-Axis Solar Tracker Gimbal Assembly" data-starter-desc="Machined 6061-T6 aluminum yoke with ±0.05 mm bearing bores, Bridgeport keyway slotting, 3D printed PETG optical sensor shroud, and dual NEMA 17 stepper drives with TMC2209 silent step sticks.">
+              <strong>Solar Tracker Gimbal</strong>
+              <span>6061-T6 Lathe &amp; Bridgeport Mill</span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="starter-chip" data-starter-title="Inverted Pendulum Linear Cart" data-starter-desc="Precision turned 303 stainless steel linear shaft, laser-cut Delrin carriage plate, AS5600 magnetic rotary encoder mount, and high-torque NEMA 17 belt drive.">
+              <strong>Inverted Pendulum Cart</strong>
+              <span>Stainless Turning &amp; Encoder Control</span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="starter-chip" data-starter-title="Autonomous AUV Pressure Hull" data-starter-desc="Cast acrylic pressure cylinder with dual O-ring aluminum endcaps bored on Clausing lathe, Boss Laser acrylic internal electronics tray, and anodized bulkhead pass-throughs.">
+              <strong>AUV Pressure Hull</strong>
+              <span>O-Ring Bulkheads &amp; Laser Baffles</span>
+            </button>
+          </li>
+        </ul>
+      </section>
+
+      <!-- COLLAPSIBLE PROJECT SPECIFICATION BRIEF FORM -->
+      <form id="project-form" class="stark-form project-brief-form is-collapsed" onsubmit="return false;">
         <fieldset class="stark-fieldset">
           <legend class="stark-legend">PROTOTYPE SPECIFICATION BRIEF</legend>
           <p class="fieldset-notice">
@@ -148,7 +195,7 @@
         </fieldset>
       </form>
 
-      <!-- Step Reader with Safety Sign-off Locks -->
+      <!-- SEQUENTIAL MANUFACTURING OPERATIONS STEP READER -->
       <section class="manufacturing-flow" aria-label="Manufacturing Step Reader">
         <header class="section-subhead">
           <h3 class="subhead-title">SEQUENTIAL MANUFACTURING OPERATIONS</h3>
@@ -228,6 +275,146 @@
         </ol>
       </section>
 
+      <!-- CONVERSATIONAL REFINEMENT STREAM (CHAT) -->
+      <section class="copilot-chat-section" aria-label="Project Fabrication Assistant Chat">
+        <header class="section-subhead">
+          <h3 class="subhead-title">CONVERSATIONAL FABRICATION ASSISTANT</h3>
+          <span class="subhead-badge" id="chat-status-badge">[STATUS: READY]</span>
+        </header>
+
+        <!-- Honest Alert Box for Chat Failures -->
+        <aside class="stark-alert-box chat-alert-box" id="chat-alert-box" role="alert" hidden>
+          <header class="alert-header">
+            <span class="alert-icon" aria-hidden="true">&#9888;</span>
+            <strong class="alert-title" id="chat-alert-title">CHAT QUERY FAILED</strong>
+          </header>
+          <p class="alert-message" id="chat-alert-message"></p>
+          <button type="button" class="btn-alert-retry" id="btn-retry-chat">RETRY</button>
+        </aside>
+
+        <progress id="chat-progress" class="stark-progress" value="0" max="100" aria-label="Chat query progress" hidden></progress>
+
+        <ul class="chat-thread" id="chat-thread-list">
+          <li class="chat-message chat-model">
+            <article class="chat-bubble">
+              <header class="chat-meta">
+                <strong class="chat-author">[ASSISTANT &bull; GEMINI 2.0]</strong>
+                <time class="chat-time">SYSTEM</time>
+              </header>
+              <p class="chat-text">Welcome to the E190 Prototyping Assistant. Describe a new build or ask specific questions in the prompt bar below, or click "Subsystems &amp; Shop Tools" in the top-right to inspect BOM parts, Campus Stockroom inventory, Steward Safety Queue, or 3D CAD.</p>
+            </article>
+          </li>
+        </ul>
+      </section>
+    </section>
+
+    <!-- BOTTOM DOCKED CHATGPT-STYLE PROMPT BAR -->
+    <footer class="chatbar-dock">
+      <form id="chat-form" class="stark-form chat-input-form chatgpt-prompt-bar" onsubmit="return false;">
+        <fieldset class="stark-fieldset chat-fieldset">
+          <legend class="sr-only">Ask Fabrication Assistant</legend>
+          <button type="button" id="btn-toggle-brief" class="btn-prompt-plus" title="Toggle Full Project Specification Brief" aria-label="Toggle Full Project Specification Brief" aria-expanded="false">+</button>
+          <label for="chat-input" class="stark-label sr-only">YOUR QUESTION</label>
+          <textarea id="chat-input" name="message" class="stark-textarea chat-textarea" rows="1" placeholder="Ask anything about your build, or describe a new project..." required></textarea>
+          <button type="button" id="btn-quick-decompose" class="btn-quick-decompose" title="Create and decompose a new manufacturing plan from prompt">
+            Decompose Plan
+          </button>
+          <button type="button" id="btn-send-chat" class="btn-action-primary chat-submit-btn" aria-label="Dispatch query">
+            <span class="sr-only">DISPATCH QUERY</span>
+            <span aria-hidden="true">&uarr;</span>
+          </button>
+        </fieldset>
+        <p id="chat-action-status" class="action-status-pill chat-status-pill" role="status" aria-live="polite">Chat ready for questions &bull; Use "+" for detailed brief or "Decompose Plan" to generate steps.</p>
+      </form>
+    </footer>
+  </main>
+
+  <!-- =================================================================== -->
+  <!-- RIGHT EXPANDABLE PANEL: SUBSYSTEMS, BOM, STEWARD, STOCKROOM & CAD   -->
+  <!-- (COLLAPSED BY DEFAULT — OPENS ON USER TOGGLE)                       -->
+  <!-- =================================================================== -->
+  <aside id="right-tools-drawer" class="sidebar-right is-collapsed" aria-label="Subsystems and Shop Tools">
+    <header class="drawer-header">
+      <hgroup class="drawer-title-group">
+        <span class="drawer-eyebrow">ENGINEERING MODULES</span>
+        <h2 class="drawer-heading">Subsystems &amp; Shop Tools</h2>
+      </hgroup>
+      <button type="button" id="btn-close-right-drawer" class="btn-drawer-close" aria-label="Close Subsystems and Shop Tools Drawer">&times;</button>
+    </header>
+
+    <!-- PRIMARY ARCHITECTURAL NAVIGATION TABS -->
+    <nav class="primary-nav" aria-label="Primary Navigation Tabs">
+      <ul class="nav-tabs-list">
+        <li class="nav-item">
+          <button type="button" class="nav-tab active" data-tab="tab-copilot" id="btn-tab-copilot" aria-controls="tab-copilot" aria-selected="true">
+            <span class="tab-order">I.</span> PROJECT CO-PILOT
+          </button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-tab" data-tab="tab-steward" id="btn-tab-steward" aria-controls="tab-steward" aria-selected="false">
+            <span class="tab-order">II.</span> STEWARD QUEUE
+          </button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-tab" data-tab="tab-stockroom" id="btn-tab-stockroom" aria-controls="tab-stockroom" aria-selected="false">
+            <span class="tab-order">III.</span> CAMPUS STOCKROOM
+          </button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-tab" data-tab="tab-cad" id="btn-tab-cad" aria-controls="tab-cad" aria-selected="false">
+            <span class="tab-order">IV.</span> 3D CAD PREVIEW
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- ================================================================= -->
+    <!-- TAB 1: PROJECT CO-PILOT (SUBSYSTEM FILTER & BOM TABLE)           -->
+    <!-- ================================================================= -->
+    <section id="tab-copilot" class="view-panel active" aria-labelledby="btn-tab-copilot">
+      <header class="panel-header">
+        <span class="panel-order-tag">[MODULE: SUBSYSTEMS &amp; BOM AUDIT]</span>
+        <h2 class="panel-title">PROJECT CO-PILOT &bull; SUBSYSTEMS &amp; BOM</h2>
+        <p class="panel-desc">Filter center-screen manufacturing operations by engineering domain and audit required parts against campus stockrooms.</p>
+      </header>
+
+      <!-- Subsystem Selector Bar -->
+      <section class="subsystems-bar" aria-label="Subsystem Filters">
+        <header class="subsystems-bar-header">
+          <h3 class="subsystems-title">ENGINEERING SUBSYSTEMS</h3>
+          <span class="subsystems-caption">FILTER WORKFLOW BY DOMAIN</span>
+        </header>
+        <nav class="subsystem-nav" aria-label="Subsystem Navigation">
+          <ul class="subsystem-list">
+            <li>
+              <button type="button" class="subsystem-btn active" data-subsystem="all">
+                <kbd>[00]</kbd> ALL
+              </button>
+            </li>
+            <li>
+              <button type="button" class="subsystem-btn" data-subsystem="mechanical">
+                <kbd>[01]</kbd> MECHANICAL
+              </button>
+            </li>
+            <li>
+              <button type="button" class="subsystem-btn" data-subsystem="electrical">
+                <kbd>[02]</kbd> ELECTRICAL
+              </button>
+            </li>
+            <li>
+              <button type="button" class="subsystem-btn" data-subsystem="firmware">
+                <kbd>[03]</kbd> FIRMWARE
+              </button>
+            </li>
+            <li>
+              <button type="button" class="subsystem-btn" data-subsystem="assembly">
+                <kbd>[04]</kbd> ASSEMBLY
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </section>
+
       <!-- Bill of Materials (BOM) Checklist -->
       <section class="bom-section" aria-label="Bill of Materials Checklist">
         <header class="section-subhead">
@@ -278,53 +465,6 @@
             </tbody>
           </table>
         </section>
-      </section>
-
-      <!-- Conversational Refinement (Chat) -->
-      <section class="copilot-chat-section" aria-label="Project Fabrication Assistant Chat">
-        <header class="section-subhead">
-          <h3 class="subhead-title">CONVERSATIONAL FABRICATION ASSISTANT</h3>
-          <span class="subhead-badge" id="chat-status-badge">[STATUS: READY]</span>
-        </header>
-        <p class="chat-intro-desc">
-          Refine manufacturing steps, inquire about tool selection, speeds &amp; feeds, or discuss safety barriers with the co-pilot.
-        </p>
-
-        <!-- Honest Alert Box for Chat Failures -->
-        <aside class="stark-alert-box chat-alert-box" id="chat-alert-box" role="alert" hidden>
-          <header class="alert-header">
-            <span class="alert-icon" aria-hidden="true">&#9888;</span>
-            <strong class="alert-title" id="chat-alert-title">CHAT QUERY FAILED</strong>
-          </header>
-          <p class="alert-message" id="chat-alert-message"></p>
-          <button type="button" class="btn-alert-retry" id="btn-retry-chat">RETRY</button>
-        </aside>
-
-        <progress id="chat-progress" class="stark-progress" value="0" max="100" aria-label="Chat query progress" hidden></progress>
-
-        <ul class="chat-thread" id="chat-thread-list">
-          <li class="chat-message chat-model">
-            <article class="chat-bubble">
-              <header class="chat-meta">
-                <strong class="chat-author">[ASSISTANT &bull; GEMINI 2.0]</strong>
-                <time class="chat-time">SYSTEM</time>
-              </header>
-              <p class="chat-text">Welcome to the E190 Prototyping Assistant. Submit your specification brief above to decompose into sequential operations, or ask specific technical questions about tooling, tolerances, or safety sign-offs.</p>
-            </article>
-          </li>
-        </ul>
-
-        <form id="chat-form" class="stark-form chat-input-form" onsubmit="return false;">
-          <fieldset class="stark-fieldset chat-fieldset">
-            <legend class="sr-only">Ask Fabrication Assistant</legend>
-            <label for="chat-input" class="stark-label sr-only">YOUR QUESTION</label>
-            <textarea id="chat-input" name="message" class="stark-textarea chat-textarea" rows="2" placeholder="e.g., What feed rate and spindle speed should I use for 6061 aluminum with a 6mm 4-flute carbide mill?" required></textarea>
-            <button type="button" id="btn-send-chat" class="btn-action-primary chat-submit-btn">
-              DISPATCH QUERY &rarr;
-            </button>
-            <p id="chat-action-status" class="action-status-pill chat-status-pill" role="status" aria-live="polite">Chat ready for questions.</p>
-          </fieldset>
-        </form>
       </section>
     </section>
 
@@ -656,8 +796,7 @@
         </table>
       </aside>
     </section>
-
-  </main>
+  </aside>
 
   <!-- =================================================================== -->
   <!-- NATIVE SEMANTIC MODAL DIALOG: SAFETY SIGN-OFF                      -->
@@ -709,27 +848,5 @@
     </form>
   </dialog>
 
-  <!-- =================================================================== -->
-  <!-- COLOPHON FOOTER                                                     -->
-  <!-- =================================================================== -->
-  <footer class="colophon-footer">
-    <section class="colophon-main">
-      <h4 class="colophon-heading">HARVEY MUDD COLLEGE &bull; DEPARTMENT OF ENGINEERING</h4>
-      <p class="colophon-lead">
-        E190 Prototyping Assistant &bull; Built to strict utilitarian, semantic HTML5, and mobile-first principles.
-      </p>
-      <nav class="footer-nav" aria-label="Footer Quick Links">
-        <ul class="footer-links-list">
-          <li><a href="#tab-copilot" class="footer-link">Directives</a></li>
-          <li><a href="/health" class="footer-link">System Health API</a></li>
-          <li><a href="/api/users" class="footer-link">Users Endpoint</a></li>
-          <li><a href="#safety-disclaimer" class="footer-link">Safety Notice</a></li>
-        </ul>
-      </nav>
-      <small id="safety-disclaimer" class="colophon-disclaimer">
-        SAFETY NOTICE: This prototyping assistant is an assistive planning tool. It does NOT replace official Harvey Mudd machine shop training, stewarding supervision, or physical machine interlocks. Always obtain in-person steward sign-off before operating hazardous machinery.
-      </small>
-    </section>
-  </footer>
 </body>
 </html>

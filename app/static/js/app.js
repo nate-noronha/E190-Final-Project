@@ -1,11 +1,11 @@
 /**
- * ARCHITECT & MAKER — FRONTEND SHELL CLIENT
+ * MAKER. — FRONTEND SHELL CLIENT (WATTS + CHATGPT 3-COLUMN WORKSPACE)
  * HMC E190 Hardware & Machining Prototyping Assistant
  *
  * Strict Directives:
  * 1. Zero LLM calls on page load (DOMContentLoaded only queries GET /health).
  * 2. Mobile-first accessible interaction, native <dialog> showModal() / close().
- * 3. Zero DIV elements generated dynamically.
+ * 3. Zero generic container elements generated dynamically (strictly semantic tags).
  * 4. Explicit user actions ONLY trigger POST /api/projects, /generate-steps, and /chat.
  * 5. Honest failure UI with retry capability on simulated or real 502/503/504 errors.
  */
@@ -21,6 +21,25 @@
   const roleRadios = document.querySelectorAll('input[name="user-role"]');
   const roleStudentLabel = document.getElementById("label-role-student");
   const roleStewardLabel = document.getElementById("label-role-steward");
+
+  // 3-Column Layout & Drawer Controls
+  const projectsSidebar = document.getElementById("projects-sidebar");
+  const btnToggleSidebar = document.getElementById("btn-toggle-sidebar");
+  const btnNewProject = document.getElementById("btn-new-project");
+  const btnRefreshProjects = document.getElementById("btn-refresh-projects");
+  const projectsHistoryList = document.getElementById("projects-history-list");
+  const topbarProjectTitle = document.getElementById("topbar-project-title");
+
+  const rightToolsDrawer = document.getElementById("right-tools-drawer");
+  const btnToggleRightDrawer = document.getElementById("btn-toggle-right-drawer");
+  const btnCloseRightDrawer = document.getElementById("btn-close-right-drawer");
+
+  const btnViewStream = document.getElementById("btn-view-stream");
+  const btnViewBrief = document.getElementById("btn-view-brief");
+  const btnToggleBrief = document.getElementById("btn-toggle-brief");
+  const btnQuickDecompose = document.getElementById("btn-quick-decompose");
+  const welcomeHero = document.getElementById("welcome-hero");
+  const starterChips = document.querySelectorAll(".starter-chip");
 
   // Subsystems & Copilot Form
   const subsystemBtns = document.querySelectorAll(".subsystem-btn");
@@ -65,10 +84,8 @@
 
   // Steward Queue & Stockroom Filters
   const queueFilterBtns = document.querySelectorAll(".facility-pill");
-  const queueItems = document.querySelectorAll(".queue-item");
   const inventorySearch = document.getElementById("inventory-search-input");
   const facilitySelect = document.getElementById("facility-select-dropdown");
-  const inventoryItems = document.querySelectorAll(".inventory-item-card");
 
   // State
   let currentActiveStudentId = null;
@@ -79,6 +96,204 @@
   let cachedSteps = [];
   let chatHistory = [];
   let lastFailedChatPayload = null;
+
+  // Curated Preset Projects for Left Sidebar Switching (Zero LLM calls)
+  const PRESET_PROJECTS = {
+    "solar-tracker": {
+      title: "Dual-Axis Solar Tracker Gimbal Assembly",
+      description:
+        "Machined 6061-T6 aluminum yoke with ±0.05 mm bearing bores, Bridgeport keyway slotting, 3D printed PETG optical sensor shroud, and dual NEMA 17 stepper drives with TMC2209 silent step sticks.",
+      steps: [
+        {
+          id: "01",
+          step_order: 1,
+          subsystem: "mechanical",
+          title: "Stock Preparation & Facing on Clausing Lathe",
+          instructions:
+            'Chuck 2.00" 6061-T6 round bar stock into 3-jaw chuck. Face both ends flat and turn outer diameter down to 48.00 mm ± 0.05 mm over 110 mm length. Apply cutting oil and calibrate dial calipers.',
+          facility: "machine_shop",
+          requires_steward_signoff: false,
+          is_completed: false,
+        },
+        {
+          id: "02",
+          step_order: 2,
+          subsystem: "mechanical",
+          title: "Bridgeport Mill Precision Keyway Slotting",
+          instructions:
+            "Clamp prepared shaft in milling vise with parallels. End mill 6.00 mm keyway slot at 1200 RPM using 4-flute solid carbide center-cutting end mill. Depth of cut 3.50 mm.",
+          facility: "machine_shop",
+          requires_steward_signoff: true,
+          safety_notes:
+            "Risk Level: HIGH. High-speed spindle chips and workpiece deflection risk. A certified shop steward must inspect vise fixturing, parallel seating, and RPM configuration before spindle start.",
+          is_completed: false,
+        },
+        {
+          id: "03",
+          step_order: 3,
+          subsystem: "assembly",
+          title: "Bearing Press-Fit with Dake Arbor Press",
+          instructions:
+            "Clean bearing journals with isopropanol. Apply thin film of Loctite 609 retaining compound. Press dual 608-2RS ball bearings into reamed bores using hand arbor press.",
+          facility: "machine_shop",
+          requires_steward_signoff: false,
+          is_completed: false,
+        },
+      ],
+      bom_items: [
+        {
+          part_name: '6061-T6 Round Bar 2.0" OD',
+          subsystem: "mechanical",
+          quantity_needed: 1,
+          source_status: "in_stock_on_campus",
+          facility: "machine_shop",
+        },
+        {
+          part_name: "TMC2209 SilentStepStick Driver",
+          subsystem: "electrical",
+          quantity_needed: 2,
+          source_status: "in_stock_on_campus",
+          facility: "ee_stockroom",
+        },
+        {
+          part_name: "AS5600 12-Bit Magnetic Rotary Encoder",
+          subsystem: "electrical",
+          quantity_needed: 1,
+          source_status: "external_purchase_needed",
+          external_purchase_note: "DigiKey #1568-1248-ND (Lead: 2 Days)",
+        },
+        {
+          part_name: "NEMA 17 Stepper Motor 42x40mm",
+          subsystem: "electrical",
+          quantity_needed: 2,
+          source_status: "in_stock_on_campus",
+          facility: "ee_stockroom",
+        },
+      ],
+      assistantWelcome:
+        "Loaded Dual-Axis Solar Tracker Gimbal Assembly. OP 02 (Bridgeport Keyway Slotting) requires Steward Safety Sign-off before completion. Ask any question below or open Subsystems & Shop Tools in the top-right.",
+    },
+    "pendulum-cart": {
+      title: "Inverted Pendulum Linear Cart",
+      description:
+        "Precision turned 303 stainless steel linear shaft, laser-cut Delrin carriage plate, AS5600 magnetic rotary encoder mount, and high-torque NEMA 17 belt drive.",
+      steps: [
+        {
+          id: "101",
+          step_order: 1,
+          subsystem: "mechanical",
+          title: "Turn 303 Stainless Linear Guide Journals on Lathe",
+          instructions:
+            "Mount 12.00 mm 303 stainless rod in collet chuck. Turn stepped shoulder to 10.00 mm ± 0.02 mm for linear ball bushing fit.",
+          facility: "machine_shop",
+          requires_steward_signoff: true,
+          safety_notes:
+            "Risk Level: HIGH. Stainless work-hardening hazard on lathe. Steward must verify collet projection length and spindle RPM <= 900.",
+          is_completed: false,
+        },
+        {
+          id: "102",
+          step_order: 2,
+          subsystem: "electrical",
+          title: "Solder TMC2209 Carrier & Encoder Pull-up Bus",
+          instructions:
+            "Populate ESP32-S3 carrier protoboard at EE Stockroom rework station. Configure I2C 4.7k pull-ups for AS5600 pendulum angle sensor.",
+          facility: "ee_stockroom",
+          requires_steward_signoff: false,
+          is_completed: false,
+        },
+        {
+          id: "103",
+          step_order: 3,
+          subsystem: "firmware",
+          title: "Calibrate 1 kHz State-Space LQR Control Loop",
+          instructions:
+            "Flash timers on ESP32-S3 for 1000 Hz encoder polling and verify emergency limit-switch cutoff.",
+          facility: "ee_stockroom",
+          requires_steward_signoff: false,
+          is_completed: false,
+        },
+      ],
+      bom_items: [
+        {
+          part_name: "ESP32-S3 Dual-Core Xtensa MCU Board",
+          subsystem: "electrical",
+          quantity_needed: 1,
+          source_status: "in_stock_on_campus",
+          facility: "ee_stockroom",
+        },
+        {
+          part_name: "TMC2209 SilentStepStick Driver",
+          subsystem: "electrical",
+          quantity_needed: 1,
+          source_status: "in_stock_on_campus",
+          facility: "ee_stockroom",
+        },
+      ],
+      assistantWelcome:
+        "Loaded Inverted Pendulum Linear Cart. Review the 303 Stainless Lathe turning step or ask about LQR control loop timing and belt tensioning.",
+    },
+    "auv-hull": {
+      title: "Autonomous AUV Pressure Hull",
+      description:
+        "Cast acrylic pressure cylinder with dual O-ring aluminum endcaps bored on Clausing lathe, Boss Laser acrylic internal electronics tray, and anodized bulkhead pass-throughs.",
+      steps: [
+        {
+          id: "201",
+          step_order: 1,
+          subsystem: "mechanical",
+          title: "Boss Laser 60W Internal Acrylic Electronics Tray Cut",
+          instructions:
+            'Place 1/4" cast acrylic sheet on Makerspace Boss Laser bed. Set air assist ON, exhaust blower HIGH, speed 18 mm/s at 75% power.',
+          facility: "makerspace",
+          requires_steward_signoff: true,
+          safety_notes:
+            "Risk Level: HIGH. Combustible acrylic vapor and laser flare-up risk. Steward must verify air assist pressure and optics cleanliness.",
+          is_completed: false,
+        },
+        {
+          id: "202",
+          step_order: 2,
+          subsystem: "mechanical",
+          title: "Turn Radial O-Ring Grooves on Aluminum Endcaps",
+          instructions:
+            "Groove AS568-238 Buna-N O-ring gland to 3.55 mm width x 2.80 mm depth with surface finish Ra <= 0.8 um.",
+          facility: "machine_shop",
+          requires_steward_signoff: false,
+          is_completed: false,
+        },
+        {
+          id: "203",
+          step_order: 3,
+          subsystem: "assembly",
+          title: "Vacuum Leak Test & Silicone Grease Assembly",
+          instructions:
+            "Apply Dow Corning 111 silicone lubricant to dual O-rings, seat acrylic hull tube, and pull -10 psi vacuum for 30 minutes.",
+          facility: "makerspace",
+          requires_steward_signoff: false,
+          is_completed: false,
+        },
+      ],
+      bom_items: [
+        {
+          part_name: '1/4" Cast Clear Acrylic Sheet 12"x24"',
+          subsystem: "mechanical",
+          quantity_needed: 2,
+          source_status: "in_stock_on_campus",
+          facility: "makerspace",
+        },
+        {
+          part_name: "BlueRobotics WetLink Penetrator M10",
+          subsystem: "assembly",
+          quantity_needed: 4,
+          source_status: "external_purchase_needed",
+          external_purchase_note: "BlueRobotics #WLP-M10 (Lead: 3 Days)",
+        },
+      ],
+      assistantWelcome:
+        "Loaded Autonomous AUV Pressure Hull. Note that Boss Laser cutting of 1/4\" cast acrylic requires a Makerspace Steward Sign-off.",
+    },
+  };
 
   function escapeHtml(str) {
     if (typeof str !== "string") return str == null ? "" : String(str);
@@ -124,9 +339,203 @@
   }
 
   /* ==========================================================================
-     2. TAB NAVIGATION SYSTEM
+     2. 3-COLUMN SIDEBARS & RIGHT DRAWER TOGGLES
+     ========================================================================== */
+  function setRightDrawerOpen(isOpen) {
+    if (!rightToolsDrawer) return;
+    rightToolsDrawer.classList.toggle("is-collapsed", !isOpen);
+    if (btnToggleRightDrawer) {
+      btnToggleRightDrawer.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    }
+  }
+
+  btnToggleRightDrawer?.addEventListener("click", () => {
+    const isCurrentlyCollapsed = rightToolsDrawer?.classList.contains("is-collapsed");
+    setRightDrawerOpen(Boolean(isCurrentlyCollapsed));
+  });
+
+  btnCloseRightDrawer?.addEventListener("click", () => {
+    setRightDrawerOpen(false);
+  });
+
+  btnToggleSidebar?.addEventListener("click", () => {
+    if (!projectsSidebar) return;
+    const isCollapsed = projectsSidebar.classList.toggle("is-collapsed");
+    btnToggleSidebar.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
+  });
+
+  function setBriefOpen(isOpen) {
+    if (!projectForm) return;
+    projectForm.classList.toggle("is-collapsed", !isOpen);
+    btnToggleBrief?.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    btnViewBrief?.classList.toggle("active", isOpen);
+    btnViewStream?.classList.toggle("active", !isOpen);
+  }
+
+  btnToggleBrief?.addEventListener("click", () => {
+    const isCurrentlyCollapsed = projectForm?.classList.contains("is-collapsed");
+    setBriefOpen(Boolean(isCurrentlyCollapsed));
+  });
+
+  btnViewBrief?.addEventListener("click", () => {
+    setBriefOpen(true);
+    projectForm?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+
+  btnViewStream?.addEventListener("click", () => {
+    setBriefOpen(false);
+  });
+
+  // Starter Chips in Watts Welcome Hero
+  starterChips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const title = chip.dataset.starterTitle || "";
+      const desc = chip.dataset.starterDesc || "";
+      if (projectTitleInput && title) projectTitleInput.value = title;
+      if (projectDescInput && desc) projectDescInput.value = desc;
+      if (topbarProjectTitle && title) topbarProjectTitle.textContent = title;
+      if (chatInput) {
+        chatInput.value = `${title}: ${desc}`;
+        chatInput.focus();
+      }
+    });
+  });
+
+  /* ==========================================================================
+     3. LEFT SIDEBAR PROJECTS LIST & SELECTION
+     ========================================================================== */
+  function markActiveProjectInSidebar(selectorAttr, selectorVal) {
+    if (!projectsHistoryList) return;
+    const items = projectsHistoryList.querySelectorAll(".project-nav-item");
+    items.forEach((li) => {
+      const matches = li.getAttribute(selectorAttr) === String(selectorVal);
+      li.classList.toggle("active", matches);
+    });
+  }
+
+  function loadPresetProject(presetKey) {
+    const preset = PRESET_PROJECTS[presetKey];
+    if (!preset) return;
+
+    currentProjectId = null;
+    markActiveProjectInSidebar("data-project-preset", presetKey);
+
+    if (topbarProjectTitle) topbarProjectTitle.textContent = preset.title;
+    if (projectTitleInput) projectTitleInput.value = preset.title;
+    if (projectDescInput) projectDescInput.value = preset.description;
+
+    renderGeneratedSteps(preset.steps);
+    renderBOMTable(preset.bom_items);
+
+    chatHistory = [];
+    if (chatThreadList) {
+      chatThreadList.innerHTML = "";
+      appendChatMessage("model", preset.assistantWelcome);
+    }
+  }
+
+  async function loadDatabaseProject(projectId) {
+    try {
+      const res = await fetch(`/api/projects/${projectId}`, {
+        headers: { Accept: "application/json" },
+      });
+      if (!res.ok) return;
+      const proj = await res.json();
+      currentProjectId = proj.id;
+      markActiveProjectInSidebar("data-project-id", String(proj.id));
+
+      if (topbarProjectTitle) topbarProjectTitle.textContent = proj.title;
+      if (projectTitleInput) projectTitleInput.value = proj.title;
+      if (projectDescInput) projectDescInput.value = proj.description;
+
+      renderGeneratedSteps(proj.steps || []);
+      renderBOMTable(proj.bom_items || []);
+
+      chatHistory = [];
+      if (chatThreadList) {
+        chatThreadList.innerHTML = "";
+        appendChatMessage(
+          "model",
+          `Loaded project "${proj.title}" (#${proj.id}) with ${(proj.steps || []).length} manufacturing operations.`
+        );
+      }
+    } catch (err) {
+      console.warn("Could not load project:", err);
+    }
+  }
+
+  function upsertProjectInSidebar(project) {
+    if (!projectsHistoryList || !project || !project.id) return;
+    let existing = projectsHistoryList.querySelector(
+      `.project-nav-item[data-project-id="${project.id}"]`
+    );
+    const stepCount = Array.isArray(project.steps) ? project.steps.length : 0;
+
+    if (!existing) {
+      existing = document.createElement("li");
+      existing.className = "project-nav-item";
+      existing.setAttribute("data-project-id", String(project.id));
+      projectsHistoryList.prepend(existing);
+    }
+
+    existing.innerHTML = `
+      <button type="button" class="project-select-btn" data-db-project-id="${escapeHtml(String(project.id))}">
+        <span class="project-item-title">${escapeHtml(project.title)}</span>
+        <span class="project-item-meta"><kbd>${stepCount} OPS</kbd> &bull; SAVED BUILD</span>
+      </button>
+    `;
+
+    markActiveProjectInSidebar("data-project-id", String(project.id));
+  }
+
+  projectsHistoryList?.addEventListener("click", (e) => {
+    const btn = e.target.closest(".project-select-btn");
+    if (!btn) return;
+
+    const presetKey = btn.dataset.presetKey;
+    const dbProjectId = btn.dataset.dbProjectId;
+    if (presetKey) {
+      loadPresetProject(presetKey);
+    } else if (dbProjectId) {
+      loadDatabaseProject(dbProjectId);
+    }
+  });
+
+  btnNewProject?.addEventListener("click", () => {
+    currentProjectId = null;
+    markActiveProjectInSidebar("data-project-id", "__none__");
+    if (topbarProjectTitle) topbarProjectTitle.textContent = "New Hardware Prototype";
+    if (projectTitleInput) projectTitleInput.value = "";
+    if (projectDescInput) projectDescInput.value = "";
+    if (welcomeHero) welcomeHero.removeAttribute("hidden");
+    setBriefOpen(true);
+    if (chatInput) {
+      chatInput.value = "";
+      chatInput.focus();
+    }
+  });
+
+  btnRefreshProjects?.addEventListener("click", async () => {
+    try {
+      const res = await fetch("/api/projects", {
+        headers: { Accept: "application/json" },
+      });
+      if (!res.ok) return;
+      const list = await res.json();
+      if (Array.isArray(list)) {
+        list.forEach((p) => upsertProjectInSidebar(p));
+      }
+    } catch (err) {
+      console.warn("Could not sync projects list:", err);
+    }
+  });
+
+  /* ==========================================================================
+     4. TAB NAVIGATION SYSTEM (INSIDE RIGHT DRAWER)
      ========================================================================== */
   function switchTab(targetTabId) {
+    setRightDrawerOpen(true);
+
     navTabs.forEach((tab) => {
       const isTarget = tab.dataset.tab === targetTabId;
       tab.classList.toggle("active", isTarget);
@@ -158,7 +567,7 @@
   });
 
   /* ==========================================================================
-     3. ROLE SWITCHER (STUDENT <-> STEWARD)
+     5. ROLE SWITCHER (STUDENT <-> STEWARD)
      ========================================================================== */
   function handleRoleChange(selectedRole) {
     if (selectedRole === "steward") {
@@ -179,7 +588,7 @@
   });
 
   /* ==========================================================================
-     4. USER MANAGEMENT (STUDENT IDENTITY)
+     6. USER MANAGEMENT (STUDENT & STEWARD IDENTITY)
      ========================================================================== */
   async function ensureStudentUser() {
     if (currentActiveStudentId) return currentActiveStudentId;
@@ -294,7 +703,7 @@
   }
 
   /* ==========================================================================
-     5. SUBSYSTEM SWITCHING (TAB 1 FILTERING)
+     7. SUBSYSTEM SWITCHING (FILTERS CENTER MANUFACTURING STEPS)
      ========================================================================== */
   function filterStepsBySubsystem(subsystemKey) {
     currentSubsystemFilter = (subsystemKey || "all").toLowerCase();
@@ -323,7 +732,6 @@
       }
     });
 
-    // Remove any previous empty card
     const existingEmpty = stepsList.querySelector(".step-empty-subsystem");
     if (existingEmpty) {
       existingEmpty.remove();
@@ -344,7 +752,7 @@
   });
 
   /* ==========================================================================
-     6. STEP & BOM RENDERING (PURE SEMANTIC HTML — ZERO DIVS)
+     8. STEP & BOM RENDERING (PURE SEMANTIC HTML)
      ========================================================================== */
   function renderGeneratedSteps(steps) {
     if (!stepsList) return;
@@ -468,20 +876,21 @@
   }
 
   /* ==========================================================================
-     7. HONEST FAILURE UI RENDERING (<aside class="stark-alert-box" role="alert">)
+     9. HONEST FAILURE UI RENDERING (<aside class="stark-alert-box" role="alert">)
      ========================================================================== */
   function showGenerationError(errorCode, errorDetail) {
     if (!generationAlert || !generationAlertMessage) return;
 
+    setBriefOpen(true);
+
     if (generationAlertTitle) {
-      generationAlertTitle.textContent = `DECOMPOSITION FAILED &bull; [${errorCode}]`;
+      generationAlertTitle.textContent = `DECOMPOSITION FAILED • [${errorCode}]`;
     }
     generationAlertMessage.textContent = `${errorCode}: ${errorDetail}`;
     generationAlert.removeAttribute("hidden");
 
     if (copilotActionStatus) {
       copilotActionStatus.textContent = `Error: ${errorCode}. Review diagnostic banner above.`;
-      copilotActionStatus.style.borderLeftColor = "#000000";
     }
   }
 
@@ -492,7 +901,7 @@
   }
 
   /* ==========================================================================
-     8. PROJECT DECOMPOSITION DISPATCH (EXPLICIT USER ACTION ONLY)
+     10. PROJECT DECOMPOSITION DISPATCH (EXPLICIT USER ACTION ONLY)
      ========================================================================== */
   async function triggerStepGeneration(projectId) {
     hideGenerationError();
@@ -500,6 +909,10 @@
     if (btnGenerateSteps) {
       btnGenerateSteps.disabled = true;
       btnGenerateSteps.textContent = "DECOMPOSING MANUFACTURING PLAN...";
+    }
+    if (btnQuickDecompose) {
+      btnQuickDecompose.disabled = true;
+      btnQuickDecompose.textContent = "Decomposing...";
     }
     if (generationProgress) {
       generationProgress.removeAttribute("hidden");
@@ -519,13 +932,16 @@
         currentProjectId = projectData.id;
         hideGenerationError();
 
+        if (topbarProjectTitle && projectData.title) {
+          topbarProjectTitle.textContent = projectData.title;
+        }
+        upsertProjectInSidebar(projectData);
         renderGeneratedSteps(projectData.steps || []);
         renderBOMTable(projectData.bom_items || []);
 
         const lockCount = (projectData.steps || []).filter((s) => s.requires_steward_signoff).length;
         if (copilotActionStatus) {
           copilotActionStatus.textContent = `Plan decomposed into ${projectData.steps.length} sequential operations with ${lockCount} steward safety sign-off gates.`;
-          copilotActionStatus.style.borderLeftColor = "#000000";
         }
       } else {
         const errPayload = await response.json().catch(() => ({}));
@@ -540,6 +956,10 @@
         btnGenerateSteps.disabled = false;
         btnGenerateSteps.textContent = "DECOMPOSE INTO MANUFACTURING PLAN →";
       }
+      if (btnQuickDecompose) {
+        btnQuickDecompose.disabled = false;
+        btnQuickDecompose.textContent = "Decompose Plan";
+      }
       if (generationProgress) {
         generationProgress.setAttribute("hidden", "until-found");
       }
@@ -552,6 +972,9 @@
 
     hideGenerationError();
 
+    if (topbarProjectTitle) {
+      topbarProjectTitle.textContent = title;
+    }
     if (copilotActionStatus) {
       copilotActionStatus.textContent = "Initializing student context and project specification...";
     }
@@ -579,6 +1002,7 @@
 
       const project = await createRes.json();
       currentProjectId = project.id;
+      upsertProjectInSidebar(project);
 
       await triggerStepGeneration(currentProjectId);
     } catch (err) {
@@ -592,6 +1016,19 @@
     handleProjectSubmit();
   });
 
+  // Quick Decompose button inside the bottom ChatGPT prompt bar
+  btnQuickDecompose?.addEventListener("click", () => {
+    const promptVal = (chatInput?.value || "").trim();
+    if (promptVal) {
+      const firstSentence = promptVal.split(/[.:;\n]/)[0].trim();
+      const derivedTitle = firstSentence.slice(0, 60) || "Custom Hardware Prototype";
+      if (projectTitleInput) projectTitleInput.value = derivedTitle;
+      if (projectDescInput) projectDescInput.value = promptVal;
+      if (chatInput) chatInput.value = "";
+    }
+    handleProjectSubmit();
+  });
+
   btnRetryGenerate?.addEventListener("click", () => {
     if (currentProjectId) {
       triggerStepGeneration(currentProjectId);
@@ -601,13 +1038,13 @@
   });
 
   /* ==========================================================================
-     9. CONVERSATIONAL REFINEMENT (CHAT)
+     11. CONVERSATIONAL REFINEMENT (CHAT)
      ========================================================================== */
   function showChatError(errorCode, errorDetail) {
     if (!chatAlertBox || !chatAlertMessage) return;
 
     if (chatAlertTitle) {
-      chatAlertTitle.textContent = `QUERY FAILED &bull; [${errorCode}]`;
+      chatAlertTitle.textContent = `QUERY FAILED • [${errorCode}]`;
     }
     chatAlertMessage.textContent = `${errorCode}: ${errorDetail}`;
     chatAlertBox.removeAttribute("hidden");
@@ -675,6 +1112,7 @@
         if (createRes.ok) {
           const newProj = await createRes.json();
           currentProjectId = newProj.id;
+          upsertProjectInSidebar(newProj);
         } else {
           showChatError("PROJECT_INIT_FAILED", "Please formulate project brief above first.");
           return;
@@ -736,6 +1174,14 @@
     handleChatSubmit();
   });
 
+  // Support Enter-to-send (Shift+Enter for newline) in ChatGPT prompt bar
+  chatInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleChatSubmit();
+    }
+  });
+
   btnRetryChat?.addEventListener("click", () => {
     if (lastFailedChatPayload && chatInput) {
       chatInput.value = lastFailedChatPayload;
@@ -744,7 +1190,7 @@
   });
 
   /* ==========================================================================
-     10. SAFETY SIGN-OFF MODAL DIALOG (<dialog id="safety-modal">)
+     12. SAFETY SIGN-OFF MODAL DIALOG (<dialog id="safety-modal">)
      ========================================================================== */
   function openSafetyModal(stepId, stepTitle, facility) {
     if (!safetyModal) return;
@@ -776,16 +1222,13 @@
   btnDialogClose?.addEventListener("click", closeSafetyModal);
   btnDialogCancel?.addEventListener("click", closeSafetyModal);
 
-  // Close dialog on backdrop click
   safetyModal?.addEventListener("click", (event) => {
     if (event.target === safetyModal) {
       closeSafetyModal();
     }
   });
 
-  // Event delegation on steps list for safety sign-off triggers and step completion toggles
   stepsList?.addEventListener("click", async (e) => {
-    // 1. Step completion toggle
     const toggleBtn = e.target.closest(".btn-toggle-step");
     if (toggleBtn) {
       const stepId = toggleBtn.dataset.stepId;
@@ -816,7 +1259,6 @@
       return;
     }
 
-    // 2. Request safety sign-off button
     const reqBtn = e.target.closest(".btn-request-signoff");
     if (reqBtn) {
       const stepId = reqBtn.dataset.stepId;
@@ -826,7 +1268,6 @@
     }
   });
 
-  // Confirm sign-off form submission
   dialogSignoffForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -850,7 +1291,6 @@
       });
 
       if (response.ok) {
-        // Mark pending step cleared in student step reader UI
         const stepBadge = document.getElementById(`step-${currentPendingStepId}-badge`);
         const stepCard = document.getElementById(`step-card-${currentPendingStepId}`);
         if (stepBadge) {
@@ -864,7 +1304,6 @@
           if (barrier) barrier.remove();
         }
 
-        // Refresh steward queue
         loadStewardQueue();
       } else {
         const errPayload = await response.json().catch(() => ({}));
@@ -878,7 +1317,7 @@
   });
 
   /* ==========================================================================
-     11. STEWARD QUEUE API & ACTIONS
+     13. STEWARD QUEUE API & ACTIONS
      ========================================================================== */
   async function loadStewardQueue(facilityFilter = "all") {
     const stewardContainer = document.getElementById("steward-queue-container");
@@ -948,7 +1387,6 @@
     }
   }
 
-  // Steward queue container event delegation (Approve & Flag)
   const stewardQueueContainer = document.getElementById("steward-queue-container");
   stewardQueueContainer?.addEventListener("click", async (e) => {
     const approveBtn = e.target.closest(".btn-steward-approve");
@@ -964,7 +1402,10 @@
     if (flagBtn) {
       const stepId = flagBtn.dataset.stepId;
       const stepTitle = flagBtn.dataset.stepTitle || "Operation";
-      const reason = prompt(`Enter safety hazard or reason for flagging "${stepTitle}":`, "Fixture rigidity insufficient / missing eye protection");
+      const reason = prompt(
+        `Enter safety hazard or reason for flagging "${stepTitle}":`,
+        "Fixture rigidity insufficient / missing eye protection"
+      );
       if (!reason || !reason.trim()) return;
 
       const stewardId = await ensureStewardUser();
@@ -1000,7 +1441,7 @@
   });
 
   /* ==========================================================================
-     12. CAMPUS STOCKROOM INVENTORY & BATCH CSV
+     14. CAMPUS STOCKROOM INVENTORY & BATCH CSV
      ========================================================================== */
   async function loadInventoryItems() {
     const gridList = document.getElementById("inventory-grid-list");
@@ -1066,7 +1507,6 @@
     }
   }
 
-  // Stockroom search and filter triggers
   inventorySearch?.addEventListener("input", () => {
     loadInventoryItems();
   });
@@ -1074,7 +1514,6 @@
     loadInventoryItems();
   });
 
-  // Stock quick adjustment (+1 / -1)
   const inventoryGridList = document.getElementById("inventory-grid-list");
   inventoryGridList?.addEventListener("click", async (e) => {
     const btn = e.target.closest(".btn-adjust-qty");
@@ -1098,7 +1537,6 @@
     }
   });
 
-  // Batch CSV Upload Handler
   const btnUploadCsv = document.getElementById("btn-upload-csv");
   const csvTextInput = document.getElementById("csv-text-input");
   const csvUploadStatus = document.getElementById("csv-upload-status");
@@ -1144,7 +1582,7 @@
   });
 
   /* ==========================================================================
-     13. CLASSMATE CAD 3D TOOL INTEGRATION HARNESS
+     15. CLASSMATE CAD 3D TOOL INTEGRATION HARNESS
      ========================================================================== */
   const btnCheckCadStatus = document.getElementById("btn-check-cad-status");
   const btnExportCadStub = document.getElementById("btn-export-cad-stub");
@@ -1200,7 +1638,7 @@
   });
 
   /* ==========================================================================
-     14. DOMContentLoaded INITIALIZATION (ZERO LLM CALLS)
+     16. DOMContentLoaded INITIALIZATION (ZERO LLM CALLS)
      ========================================================================== */
   document.addEventListener("DOMContentLoaded", () => {
     // STRICT DIRECTIVE: Only invoke static relational / health endpoint
