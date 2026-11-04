@@ -19,7 +19,7 @@ htmlcov/
 # Environment & Secrets
 .env
 .env.local
-*.local
+*.local/
 
 # Multi-Agent Worktrees
 .worktrees/
