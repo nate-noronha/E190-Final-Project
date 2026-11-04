@@ -11,7 +11,10 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.routers.health import router as health_router
+from app.routers.integrations import router as integrations_router
+from app.routers.inventory import router as inventory_router
 from app.routers.projects import router as projects_router
+from app.routers.steward import router as steward_router
 from app.routers.users import router as users_router
 
 logger = logging.getLogger(__name__)
@@ -71,4 +74,7 @@ async def read_root():
 app.include_router(health_router)
 app.include_router(users_router)
 app.include_router(projects_router)
+app.include_router(steward_router)
+app.include_router(inventory_router)
+app.include_router(integrations_router)
 

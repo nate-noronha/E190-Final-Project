@@ -127,7 +127,51 @@ This document records architectural decisions, test verification results, user i
 - **Verification**:
   - Independent Adversarial Audit Report: **VERDICT PASS** (0 critical, 0 warnings).
   - Full test suite: **72 passed in 1.47s** against live PostgreSQL.
+- **PR**: PR #5 squashed and merged into `main`.
+
+---
+
+## 2026-11-03: Slices 4, 5, and 6 — Shop Steward Workflow, Makerspace Inventory & Compliance Suite
+
+- **Branch**: `feature/slices-4-5-6-complete`
+- **Agents Involved**:
+  - `Lead Orchestrator` (Antigravity Coordinator)
+  - `Claude-Backend` (FastAPI / SQLModel schema & endpoint design)
+  - `AGY-Frontend` (Semantic UI, zero-div DOM manipulation, interactive filters)
+  - `AGY-Auditor` (Automated compliance verification & test harness)
+- **Actions Taken**:
+  - **Slice 4 (Shop Steward Safety Check-off Workflow)**:
+    - Router `app/routers/steward.py` implementing:
+      - `GET /api/steward/pending-signoffs`: Returns all hazardous steps requiring steward approval, joined with student and project metadata, filterable by facility.
+      - `POST /api/steps/{step_id}/approve-safety`: Role-guarded endpoint (rejects non-stewards with 403), records steward id and timestamp, updates safety notes, commits to Postgres.
+      - `POST /api/steps/{step_id}/flag-safety`: Allows steward to flag safety hazards, resetting approval and completion states with explanatory notice.
+      - `POST /api/steps/{step_id}/toggle-complete`: Strictly blocks student step completion (400 Bad Request) if step requires steward sign-off and is not approved.
+    - Frontend wiring:
+      - Steward Queue tab dynamically loads pending requests and updates queue badge count.
+      - Semantic `<dialog id="safety-modal">` checklist for PPE, fixturing, speeds/feeds, and notes.
+      - Real-time step status badge transitions (`[STATUS: PENDING STEWARD SIGN-OFF]` -> `[STATUS: SAFETY APPROVED]`).
+  - **Slice 5 (Makerspace Inventory & Pending Integrations)**:
+    - Router `app/routers/inventory.py` implementing:
+      - `GET /api/inventory`: Full catalog list with fuzzy search across SKU/name/location and facility filters.
+      - `POST /api/inventory`: Creates new stock item.
+      - `PATCH /api/inventory/{item_id}`: Quick stock adjustment (+/-).
+      - `DELETE /api/inventory/{item_id}`: Removes item.
+      - `POST /api/inventory/upload-csv`: Bulk CSV batch importer accepting CSV files, JSON payloads, or raw text; parses columns `sku,name,category,facility,location,quantity,unit`, updates existing SKUs and inserts new ones, returning structured import summaries.
+    - Integration module `app/integrations/csv_import.py` for resilient delimiter and column normalization.
+    - Integration module `app/integrations/cad_tool.py` and router `app/routers/integrations.py`:
+      - `GET /api/integrations/cad/status`: Clean bridge contract for classmate's 3D CAD visualization software.
+      - `POST /api/integrations/cad/export-stl-stub`: Mock export job scheduler returning STL download stub.
+  - **Slice 6 (Automated Compliance Directives Suite)**:
+    - Implemented `tests/test_directives.py` asserting all 6 core directives:
+      1. Zero `<div>` tags in HTML templates and JavaScript frontend code.
+      2. Zero page-load LLM calls across all GET routes (verified via MagicMock spy on `GeminiService`).
+      3. Strict Steward Safety Gate invariant (hazardous steps blocked from completion until approved; non-stewards rejected).
+      4. Relational durability across engine resets (`reset_engine()`).
+      5. Zero hardcoded secrets in repository files.
+      6. Honest error envelopes with 503 and retryable metadata.
+- **Verification**:
+  - All **90/90 tests passing** in `pytest` across backend, frontend, and directives.
 - **Next Steps**:
-  - Open PR #5 and await human review.
-  - Proceed to **Slice 4: Shop Steward Safety Check-Off Workflow**.
+  - Create focused PR #6 for human review.
+
 
