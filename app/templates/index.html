@@ -567,15 +567,22 @@
         </li>
       </ul>
 
-      <!-- Placeholder Architecture for Bulk CSV Uploads -->
-      <aside class="stark-placeholder-card" aria-label="Bulk Inventory Upload Placeholder">
+      <!-- Bulk CSV Upload Module -->
+      <aside class="stark-placeholder-card" aria-label="Bulk Inventory Upload Module">
         <header class="placeholder-header">
-          <span class="placeholder-tag">[DIRECTIVE &bull; PENDING INTEGRATION]</span>
+          <span class="placeholder-tag">[MODULE &bull; BATCH INVENTORY SYNC]</span>
           <h4 class="placeholder-title">BULK CSV INVENTORY UPLOAD MODULE</h4>
         </header>
         <p class="placeholder-text">
-          Architecture reservation for shop stewards to perform bulk batch sync of stockroom CSV spreadsheets directly into PostgreSQL. Schema hooks prepared in <code>app/models/domain.py</code>.
+          Shop stewards can perform bulk batch sync of stockroom CSV spreadsheets directly into PostgreSQL.
+          Headers required: <code>sku, name, category, facility, location, quantity, unit</code>.
         </p>
+        <form id="csv-upload-form" class="stark-form" onsubmit="return false;">
+          <label for="csv-text-input" class="stark-label">CSV SPREADSHEET PAYLOAD</label>
+          <textarea id="csv-text-input" class="stark-textarea" rows="4" placeholder="sku,name,category,facility,location,quantity,unit&#10;MS-AL-6061,6061 Aluminum Plate,Raw Stock,machine_shop,Bin MS-01,15,pcs&#10;MK-PLA-BLK,Black PLA 1.75mm,Filament,makerspace,Bin MK-02,25,spools"></textarea>
+          <button type="button" id="btn-upload-csv" class="btn-action-primary">IMPORT INVENTORY CSV &rarr;</button>
+          <p id="csv-upload-status" class="action-status-pill" role="status" aria-live="polite">Ready for steward batch sync.</p>
+        </form>
       </aside>
     </section>
 
@@ -589,6 +596,16 @@
         <p class="panel-desc">Dedicated WebGL / Three.js viewport harness prepared for seamless docking of classmate 3D visualization and CAD analysis micro-tool.</p>
       </header>
 
+      <section class="cad-action-controls" aria-label="CAD Bridge Actions">
+        <button type="button" id="btn-check-cad-status" class="btn-action-primary">
+          POLL CAD BRIDGE STATUS
+        </button>
+        <button type="button" id="btn-export-cad-stub" class="btn-action-cancel">
+          EXPORT MOCK STL JOB
+        </button>
+        <p id="cad-action-status" class="action-status-pill" role="status" aria-live="polite">Bridge standby.</p>
+      </section>
+
       <figure class="cad-display-frame">
         <section class="cad-canvas-mockup" id="cad-canvas-box" aria-label="3D Model Viewport">
           <span class="cad-crosshair-center" aria-hidden="true">+</span>
@@ -597,8 +614,8 @@
             <kbd class="axis-y">Y</kbd>
             <kbd class="axis-z">Z</kbd>
           </span>
-          <code class="cad-telemetry-tag">[RENDER_STATUS: STANDBY &bull; THREE.JS_DOCK_READY &bull; ORTHOGRAPHIC]</code>
-          <p class="cad-prompt-text">Awaiting 3D STEP / STL / GLTF Model Stream from CAD Subsystem</p>
+          <code class="cad-telemetry-tag" id="cad-telemetry-status">[RENDER_STATUS: STANDBY &bull; THREE.JS_DOCK_READY &bull; ORTHOGRAPHIC]</code>
+          <p class="cad-prompt-text" id="cad-prompt-text">Awaiting 3D STEP / STL / GLTF Model Stream from CAD Subsystem</p>
         </section>
         <figcaption class="cad-caption">
           <strong>FIGURE 1.1:</strong> 3D CAD preview integration boundary. Designed to accept postMessage or iframe event bus from classmate geometry analyzer.

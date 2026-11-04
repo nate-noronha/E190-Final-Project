@@ -116,3 +116,113 @@ class ErrorResponse(BaseModel):
     error: str
     message: str
     retryable: bool = False
+
+
+# ---------------------------------------------------------------------------
+# Steward Safety Sign-off DTOs
+# ---------------------------------------------------------------------------
+
+
+class StewardSignoffRequest(BaseModel):
+    steward_id: int
+    notes: Optional[str] = None
+
+
+class StewardFlagRequest(BaseModel):
+    steward_id: int
+    reason: str
+
+
+class StepCompleteToggle(BaseModel):
+    student_id: int
+    is_completed: bool
+
+
+class PendingSignoffRead(BaseModel):
+    step_id: int
+    project_id: int
+    project_title: str
+    student_id: int
+    student_name: str
+    step_order: int
+    subsystem: SubsystemEnum
+    facility: Optional[FacilityEnum] = None
+    title: str
+    instructions: str
+    safety_notes: Optional[str] = None
+    safety_level: SafetyLevelEnum
+
+
+# ---------------------------------------------------------------------------
+# Inventory DTOs
+# ---------------------------------------------------------------------------
+
+
+class InventoryItemCreate(BaseModel):
+    sku: str
+    name: str
+    category: str
+    facility: FacilityEnum
+    location: str
+    quantity: int = 0
+    unit: str = "pcs"
+    updated_by: Optional[int] = None
+
+
+class InventoryItemUpdate(BaseModel):
+    quantity: Optional[int] = None
+    location: Optional[str] = None
+    name: Optional[str] = None
+    category: Optional[str] = None
+    facility: Optional[FacilityEnum] = None
+    unit: Optional[str] = None
+    updated_by: Optional[int] = None
+
+
+class InventoryItemRead(BaseModel):
+    id: int
+    sku: str
+    name: str
+    category: str
+    facility: FacilityEnum
+    location: str
+    quantity: int
+    unit: str
+    updated_by: Optional[int] = None
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class CSVImportSummary(BaseModel):
+    imported_count: int
+    skipped_count: int
+    errors: list[str] = []
+
+
+# ---------------------------------------------------------------------------
+# Classmate CAD 3D Tool Integration DTOs
+# ---------------------------------------------------------------------------
+
+
+class CADStatusResponse(BaseModel):
+    status: str
+    bridge_version: str
+    webhook_url: Optional[str] = None
+    supported_formats: list[str]
+
+
+class CADExportStubRequest(BaseModel):
+    project_id: int
+    part_name: str
+    format: str = "stl"
+    parameters: dict = {}
+
+
+class CADExportStubResponse(BaseModel):
+    job_id: str
+    status: str
+    part_name: str
+    download_stub_url: str
+    note: str
+
