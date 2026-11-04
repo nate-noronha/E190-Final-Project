@@ -3,7 +3,10 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
+
+load_dotenv()
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 

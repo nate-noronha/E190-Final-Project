@@ -137,7 +137,7 @@ class GeminiService:
     constructor to inject a mock for unit tests without touching the network.
     """
 
-    MODEL = "gemini-2.0-flash"
+    MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
     def __init__(self, client=None):
         # A pre-built client (real or mock) can be injected for testing.
