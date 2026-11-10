@@ -193,5 +193,22 @@ This document records architectural decisions, test verification results, user i
   - Independent `AGY-Auditor` verification: **VERDICT PASS** (`0` `<div>` tags in `index.html` and `app.js`, `0` page-load LLM calls, all semantic landmarks and safety gate workflows preserved).
   - Full test suite: **90/90 tests passing** (`pytest -v`).
 
+---
+
+## 2026-11-09: HMC MAKE Theme Redesign — Matching `make.hmc.edu`
+
+- **Branch**: `ui/hmc-make-theme` (branched cleanly from `main`)
+- **Agents Involved**:
+  - `HMC MAKE Theme Designer` (subagent investigating `make.hmc.edu` + updating semantic styles & markup)
+- **Design Alignment**:
+  - Audited live `https://make.hmc.edu` (`/`, `/areas`, `/inventory`) and user screenshots to extract authentic design tokens while preserving the ChatGPT 3-column layout and collapsible right-hand drawer:
+    - **Left Projects Sidebar (`#projects-sidebar`)**: Solid HMC Makerspace Gold (`#F0A020` / `#EF9F1F`) with chunky geometric rounded **"MAKE"** wordmark, dark pill active selection states, HMC College crest block, and Student/Steward role switcher.
+    - **Center Workspace & Prompt Pill**: Deep carbon warm-black surface (`#0D0808`), `"Welcome to MAKE / Ready when you are."` hero, dark prompt pill (`#chat-form.chatgpt-prompt-bar`) with glowing gold CTA send button, and dark warm-gray operation cards (`#1E1A1A`) matching the `make.hmc.edu/areas` layout.
+    - **Stockroom & BOM Tables**: Restyled to match `make.hmc.edu/inventory` with green/red quantity status badges and dark cabinet/location chips inside the collapsible right drawer (`#right-tools-drawer`).
+- **Verification**:
+  - Full test suite: **90/90 tests passing** (`pytest -q`).
+  - Verified live local preview via headless Chrome across desktop (1440×900, drawer open & closed) and mobile viewports.
+
+
 
 
