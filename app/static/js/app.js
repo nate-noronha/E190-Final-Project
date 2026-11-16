@@ -358,10 +358,42 @@
     setRightDrawerOpen(false);
   });
 
-  btnToggleSidebar?.addEventListener("click", () => {
+  function setSidebarOpen(isOpen) {
     if (!projectsSidebar) return;
-    const isCollapsed = projectsSidebar.classList.toggle("is-collapsed");
-    btnToggleSidebar.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
+    projectsSidebar.classList.toggle("is-collapsed", !isOpen);
+    btnToggleSidebar?.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  }
+
+  function closeSidebarOnMobile() {
+    if (window.innerWidth < 960) {
+      setSidebarOpen(false);
+    }
+  }
+
+  // Collapse left sidebar by default on phone/tablet screens
+  if (window.innerWidth < 960) {
+    setSidebarOpen(false);
+  }
+
+  btnToggleSidebar?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (!projectsSidebar) return;
+    const isCurrentlyCollapsed = projectsSidebar.classList.contains("is-collapsed");
+    setSidebarOpen(Boolean(isCurrentlyCollapsed));
+  });
+
+  // Tapping the main workspace on mobile closes an open sidebar drawer
+  document.getElementById("main-content")?.addEventListener("click", () => {
+    if (window.innerWidth < 960 && projectsSidebar && !projectsSidebar.classList.contains("is-collapsed")) {
+      setSidebarOpen(false);
+    }
+  });
+
+  btnNewProject?.addEventListener("click", closeSidebarOnMobile);
+  projectsHistoryList?.addEventListener("click", (e) => {
+    if (e.target.closest("button, a, li")) {
+      closeSidebarOnMobile();
+    }
   });
 
   function setBriefOpen(isOpen) {
