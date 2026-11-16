@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Lexend:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/style.css">
-  <script src="/static/js/app.js" defer></script>
+  <link rel="stylesheet" href="/static/css/style.css?v=4">
+  <script src="/static/js/app.js?v=4" defer></script>
 </head>
 <body class="app-shell">
 
@@ -39,24 +39,6 @@
       </header>
 
       <ul id="projects-history-list" class="projects-history-list">
-        <li class="project-nav-item active" data-project-preset="solar-tracker">
-          <button type="button" class="project-select-btn" data-preset-key="solar-tracker">
-            <span class="project-item-title">Dual-Axis Solar Tracker Gimbal</span>
-            <span class="project-item-meta"><kbd>3 OPS</kbd> &bull; [MACHINE_SHOP]</span>
-          </button>
-        </li>
-        <li class="project-nav-item" data-project-preset="pendulum-cart">
-          <button type="button" class="project-select-btn" data-preset-key="pendulum-cart">
-            <span class="project-item-title">Inverted Pendulum Linear Cart</span>
-            <span class="project-item-meta"><kbd>3 OPS</kbd> &bull; [EE_STOCKROOM]</span>
-          </button>
-        </li>
-        <li class="project-nav-item" data-project-preset="auv-hull">
-          <button type="button" class="project-select-btn" data-preset-key="auv-hull">
-            <span class="project-item-title">Autonomous AUV Pressure Hull</span>
-            <span class="project-item-meta"><kbd>3 OPS</kbd> &bull; [MAKERSPACE]</span>
-          </button>
-        </li>
       </ul>
     </nav>
 
@@ -110,7 +92,7 @@
         <button type="button" id="btn-toggle-sidebar" class="btn-topbar-icon" aria-label="Toggle Projects Sidebar" aria-expanded="true" title="Toggle Projects Sidebar">
           &#9776;
         </button>
-        <span id="topbar-project-title" class="topbar-project-title">Dual-Axis Solar Tracker Gimbal Assembly</span>
+        <span id="topbar-project-title" class="topbar-project-title">New Project</span>
       </section>
 
       <nav class="center-view-switcher" aria-label="Workspace View Switcher">
@@ -145,29 +127,7 @@
         <p class="hero-wordmark" aria-hidden="true">MAKE</p>
         <span class="watts-eyebrow-pill">Harvey Mudd College &bull; E190 Shop Co-Pilot</span>
         <h2 class="watts-hero-heading">Ready when you are.</h2>
-        <p class="watts-hero-sub">
-          Describe your hardware prototype below to decompose sequential shop operations, audit campus stockroom availability, or ask technical questions about feeds, speeds, and safety locks.
-        </p>
-        <ul class="starter-chips-list" aria-label="Starter Prototype Prompts">
-          <li>
-            <button type="button" class="starter-chip" data-starter-title="Dual-Axis Solar Tracker Gimbal Assembly" data-starter-desc="Machined 6061-T6 aluminum yoke with ±0.05 mm bearing bores, Bridgeport keyway slotting, 3D printed PETG optical sensor shroud, and dual NEMA 17 stepper drives with TMC2209 silent step sticks.">
-              <strong>Solar Tracker Gimbal</strong>
-              <span>6061-T6 Lathe &amp; Bridgeport Mill</span>
-            </button>
-          </li>
-          <li>
-            <button type="button" class="starter-chip" data-starter-title="Inverted Pendulum Linear Cart" data-starter-desc="Precision turned 303 stainless steel linear shaft, laser-cut Delrin carriage plate, AS5600 magnetic rotary encoder mount, and high-torque NEMA 17 belt drive.">
-              <strong>Inverted Pendulum Cart</strong>
-              <span>Stainless Turning &amp; Encoder Control</span>
-            </button>
-          </li>
-          <li>
-            <button type="button" class="starter-chip" data-starter-title="Autonomous AUV Pressure Hull" data-starter-desc="Cast acrylic pressure cylinder with dual O-ring aluminum endcaps bored on Clausing lathe, Boss Laser acrylic internal electronics tray, and anodized bulkhead pass-throughs.">
-              <strong>AUV Pressure Hull</strong>
-              <span>O-Ring Bulkheads &amp; Laser Baffles</span>
-            </button>
-          </li>
-        </ul>
+        <p class="watts-hero-sub">Describe your hardware prototype below to get started.</p>
       </section>
 
       <!-- COLLAPSIBLE PROJECT SPECIFICATION BRIEF FORM -->
@@ -191,10 +151,10 @@
           <progress id="generation-progress" class="stark-progress" value="0" max="100" aria-label="Step generation progress" hidden></progress>
 
           <label for="project-title-input" class="stark-label">PROJECT TITLE</label>
-          <input type="text" id="project-title-input" name="title" class="stark-input" value="Dual-Axis Solar Tracker Gimbal Assembly" placeholder="e.g., Autonomous Solar Sun-Tracker Gimbal" required>
+          <input type="text" id="project-title-input" name="title" class="stark-input" value="" placeholder="e.g., Autonomous Solar Sun-Tracker Gimbal" required>
 
           <label for="project-desc-input" class="stark-label">ENGINEERING CONSTRAINTS &amp; TARGET TOLERANCES</label>
-          <textarea id="project-desc-input" name="description" class="stark-textarea" rows="3" placeholder="Specify machining materials (6061-T6 Aluminum, Delrin, PLA), angular backlash (&plusmn;0.05&deg;), and required machinery...">Machined 6061-T6 aluminum yoke with &plusmn;0.05 mm bearing bores, Bridgeport keyway slotting, 3D printed PETG optical sensor shroud, and dual NEMA 17 stepper drives with TMC2209 silent step sticks.</textarea>
+          <textarea id="project-desc-input" name="description" class="stark-textarea" rows="3" placeholder="Specify machining materials (6061-T6 Aluminum, Delrin, PLA), angular backlash (&plusmn;0.05&deg;), and required machinery..."></textarea>
 
           <button type="button" id="btn-generate-steps" class="btn-action-primary">
             DECOMPOSE INTO MANUFACTURING PLAN &rarr;
@@ -203,7 +163,7 @@
         </fieldset>
       </form>
 
-      <!-- SEQUENTIAL MANUFACTURING OPERATIONS STEP READER -->
+      <!-- MANUFACTURING STEP READER (hidden until steps are generated) -->
       <section class="manufacturing-flow" aria-label="Manufacturing Step Reader">
         <header class="section-subhead">
           <h3 class="subhead-title">SEQUENTIAL MANUFACTURING OPERATIONS</h3>
@@ -211,75 +171,6 @@
         </header>
 
         <ol class="steps-ordered-list" id="steps-ordered-list">
-          <!-- Step 1: Normal / Cleared -->
-          <li class="step-card step-cleared" id="step-card-01" data-subsystem="mechanical">
-            <article class="step-article">
-              <header class="step-header">
-                <span class="step-indicator"><kbd>OP 01</kbd></span>
-                <h4 class="step-title">Stock Preparation &amp; Facing on Clausing Lathe</h4>
-                <span class="facility-badge">[MACHINE_SHOP]</span>
-                <span class="subsystem-badge-pill"><kbd>[MECHANICAL]</kbd></span>
-              </header>
-              <p class="step-instruction">
-                Chuck 2.00" 6061-T6 round bar stock into 3-jaw chuck. Face both ends flat and turn outer diameter down to 48.00 mm &plusmn; 0.05 mm over 110 mm length. Apply cutting oil and calibrate dial calipers.
-              </p>
-              <footer class="step-status-footer">
-                <span class="safety-tag safety-normal">&bull; Standard Machine Shop Safety Protocol</span>
-                <span class="gate-status-pill pill-cleared">[STATUS: CLEARED]</span>
-              </footer>
-            </article>
-          </li>
-
-          <!-- Step 2: Safety Sign-off Lock Required -->
-          <li class="step-card step-locked" id="step-card-02" data-subsystem="mechanical">
-            <article class="step-article">
-              <header class="step-header">
-                <span class="step-indicator"><kbd>OP 02</kbd></span>
-                <h4 class="step-title">Bridgeport Mill Precision Keyway Slotting</h4>
-                <span class="facility-badge">[MACHINE_SHOP]</span>
-                <span class="subsystem-badge-pill"><kbd>[MECHANICAL]</kbd></span>
-              </header>
-              <p class="step-instruction">
-                Clamp prepared shaft in milling vise with parallels. End mill 6.00 mm keyway slot at 1200 RPM using 4-flute solid carbide center-cutting end mill. Depth of cut 3.50 mm.
-              </p>
-
-              <!-- Safety Barrier Gate -->
-              <section class="safety-barrier" aria-label="Safety Sign-off Lock">
-                <span class="barrier-warning-symbol" aria-hidden="true">&#9888;</span>
-                <h5 class="barrier-title">STEWARD SAFETY SIGN-OFF REQUIRED BEFORE OPERATION</h5>
-                <p class="barrier-text">
-                  Risk Level: HIGH. High-speed spindle chips and workpiece deflection risk. A certified shop steward must inspect vise fixturing, parallel seating, and RPM configuration before spindle start.
-                </p>
-                <button type="button" class="btn-request-signoff" data-step-id="step-02" data-step-title="Bridgeport Mill Precision Keyway Slotting" data-facility="machine_shop">
-                  REQUEST STEWARD SAFETY SIGN-OFF
-                </button>
-              </section>
-
-              <footer class="step-status-footer">
-                <span class="safety-tag safety-critical">&bull; Safety Gate Active &mdash; Machine Interlocked</span>
-                <span class="gate-status-pill pill-locked" id="step-02-badge">[STATUS: PENDING STEWARD SIGN-OFF]</span>
-              </footer>
-            </article>
-          </li>
-
-          <!-- Step 3: Downstream Locked Step -->
-          <li class="step-card step-downstream" id="step-card-03" data-subsystem="mechanical">
-            <article class="step-article">
-              <header class="step-header">
-                <span class="step-indicator"><kbd>OP 03</kbd></span>
-                <h4 class="step-title">Bearing Press-Fit with Dake Arbor Press</h4>
-                <span class="facility-badge">[MACHINE_SHOP]</span>
-                <span class="subsystem-badge-pill"><kbd>[MECHANICAL]</kbd></span>
-              </header>
-              <p class="step-instruction">
-                Clean bearing journals with isopropanol. Apply thin film of Loctite 609 retaining compound. Press dual 608-2RS ball bearings into reamed bores using hand arbor press.
-              </p>
-              <footer class="step-status-footer">
-                <span class="safety-tag safety-normal">&bull; Standard Mechanical Assembly Protocol</span>
-                <span class="gate-status-pill pill-waiting" id="step-03-badge">[STATUS: AWAITING OP 02 SIGN-OFF]</span>
-              </footer>
-            </article>
-          </li>
         </ol>
       </section>
 

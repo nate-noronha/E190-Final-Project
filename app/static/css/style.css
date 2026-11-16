@@ -1019,6 +1019,11 @@ select:focus-visible {
   box-shadow: var(--shadow-card);
 }
 
+/* Hide the step reader card entirely until a plan has been generated */
+.manufacturing-flow:not(:has(.step-card)) {
+  display: none;
+}
+
 .section-subhead {
   display: flex;
   justify-content: space-between;
@@ -1341,6 +1346,26 @@ select:focus-visible {
   line-height: 1.6;
   color: var(--make-text-strong);
   white-space: pre-wrap;
+}
+
+/* Markdown tables rendered inside assistant chat replies */
+.chat-table {
+  margin: 0.75rem 0;
+  box-shadow: none;
+  background-color: var(--make-ink);
+}
+
+.chat-table .stark-table td {
+  vertical-align: top;
+  line-height: 1.45;
+}
+
+.chat-table .stark-table tbody tr + tr td {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.chat-table .source-tag {
+  white-space: nowrap;
 }
 
 /* Bottom Docked ChatGPT Prompt Bar (make.hmc.edu dark search input) */
@@ -2398,6 +2423,113 @@ select:focus-visible {
   overflow: hidden;
   background-color: var(--make-surface-200);
   margin: 0.6rem 0;
+}
+
+/* ==========================================================================
+   "THINKING" LOADER — shown while Gemini generates a plan or chat reply
+   ========================================================================== */
+.thinking-loader {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  background-color: var(--make-surface-1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  animation: thinking-fade-in 0.25s ease-out;
+}
+
+.thinking-loader--block {
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  padding: 2.5rem 1.25rem;
+  min-height: 220px;
+}
+
+.thinking-loader--inline {
+  padding: 1rem 1.15rem;
+  max-width: 100%;
+}
+
+.thinking-spinner {
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 4px solid var(--make-surface-200);
+  border-top-color: var(--make-gold);
+  animation: thinking-spin 0.9s linear infinite;
+}
+
+.thinking-loader--block .thinking-spinner {
+  width: 64px;
+  height: 64px;
+  border-width: 5px;
+}
+
+.thinking-loader--inline .thinking-spinner {
+  width: 36px;
+  height: 36px;
+}
+
+.thinking-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0;
+}
+
+.thinking-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  color: var(--make-gold);
+  letter-spacing: 0.02em;
+}
+
+.thinking-loader--block .thinking-label {
+  font-size: 1.35rem;
+}
+
+.thinking-loader--inline .thinking-label {
+  font-size: 1rem;
+}
+
+.thinking-dots::after {
+  content: "";
+  display: inline-block;
+  width: 1.2em;
+  text-align: left;
+  animation: thinking-dots 1.4s steps(4, end) infinite;
+}
+
+.thinking-elapsed {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.78rem;
+  color: var(--make-soft);
+}
+
+.chat-thinking {
+  list-style: none;
+}
+
+@keyframes thinking-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes thinking-dots {
+  0%   { content: ""; }
+  25%  { content: "."; }
+  50%  { content: ".."; }
+  75%  { content: "..."; }
+}
+
+@keyframes thinking-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thinking-loader { animation: none; }
+  .thinking-spinner { animation-duration: 2.4s; }
+  .thinking-dots::after { animation: none; content: "..."; }
 }
 
 .stark-progress[hidden] {

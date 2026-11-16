@@ -903,8 +903,47 @@
   /* ==========================================================================
      10. PROJECT DECOMPOSITION DISPATCH (EXPLICIT USER ACTION ONLY)
      ========================================================================== */
+  /* --------------------------------------------------------------------------
+     Large "thinking" loader shown while Gemini is working.
+     Returns a handle with stop() that removes it and clears the timer.
+     -------------------------------------------------------------------------- */
+  function createThinkingLoader(label, variant = "block") {
+    const el = document.createElement("section");
+    el.className = `thinking-loader thinking-loader--${variant}`;
+    el.setAttribute("role", "status");
+    el.setAttribute("aria-live", "polite");
+    el.innerHTML = `
+      <span class="thinking-spinner" aria-hidden="true"></span>
+      <p class="thinking-text">
+        <strong class="thinking-label">${escapeHtml(label)}<span class="thinking-dots" aria-hidden="true"></span></strong>
+        <small class="thinking-elapsed">0s elapsed</small>
+      </p>
+    `;
+    const elapsedEl = el.querySelector(".thinking-elapsed");
+    const startedAt = Date.now();
+    const timer = setInterval(() => {
+      const secs = Math.floor((Date.now() - startedAt) / 1000);
+      if (elapsedEl) elapsedEl.textContent = `${secs}s elapsed`;
+    }, 1000);
+
+    return {
+      el,
+      stop() {
+        clearInterval(timer);
+        el.remove();
+      },
+    };
+  }
+
   async function triggerStepGeneration(projectId) {
     hideGenerationError();
+
+    const planLoader = createThinkingLoader("Generating build plan", "block");
+    const stepsSection = document.querySelector(".manufacturing-flow");
+    if (stepsSection?.parentNode) {
+      stepsSection.parentNode.insertBefore(planLoader.el, stepsSection);
+      planLoader.el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
 
     if (btnGenerateSteps) {
       btnGenerateSteps.disabled = true;
@@ -952,6 +991,7 @@
     } catch (networkErr) {
       showGenerationError("NETWORK_TIMEOUT", networkErr.message || "Please retry connecting to server.");
     } finally {
+      planLoader.stop();
       if (btnGenerateSteps) {
         btnGenerateSteps.disabled = false;
         btnGenerateSteps.textContent = "DECOMPOSE INTO MANUFACTURING PLAN →";
@@ -1063,6 +1103,90 @@
     }
   }
 
+  /* --------------------------------------------------------------------------
+     Rich chat rendering: turns Markdown tables in assistant replies into real
+     <table> elements. Everything is HTML-escaped before any markup is added.
+     -------------------------------------------------------------------------- */
+  const TABLE_SEPARATOR_RE = /^\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?$/;
+
+  function splitTableRow(line) {
+    let row = line.trim();
+    if (row.startsWith("|")) row = row.slice(1);
+    if (row.endsWith("|")) row = row.slice(0, -1);
+    return row.split("|").map((cell) => cell.trim());
+  }
+
+  function formatInline(escapedText) {
+    // Supports **bold** and `code` on already-escaped text.
+    return escapedText
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/`([^`]+)`/g, "<code>$1</code>");
+  }
+
+  function formatTableCell(cell) {
+    const key = cell.toLowerCase();
+    if (key === "in_stock_on_campus") {
+      return `<span class="source-tag in-stock">In stock on campus</span>`;
+    }
+    if (key === "external_purchase_needed") {
+      return `<span class="source-tag external">Purchase needed</span>`;
+    }
+    return formatInline(escapeHtml(cell));
+  }
+
+  function renderMarkdownTable(lines) {
+    const header = splitTableRow(lines[0]);
+    const bodyRows = lines.slice(2).map(splitTableRow);
+    const headHtml = header.map((h) => `<th scope="col">${formatInline(escapeHtml(h))}</th>`).join("");
+    const bodyHtml = bodyRows
+      .map((cells) => {
+        const padded = header.map((_, i) => cells[i] ?? "");
+        return `<tr>${padded
+          .map((c, i) => (i === 0 ? `<td><strong>${formatTableCell(c)}</strong></td>` : `<td>${formatTableCell(c)}</td>`))
+          .join("")}</tr>`;
+      })
+      .join("");
+    return `<figure class="table-container chat-table"><table class="stark-table"><thead><tr>${headHtml}</tr></thead><tbody>${bodyHtml}</tbody></table></figure>`;
+  }
+
+  function renderRichChatText(text) {
+    const lines = String(text ?? "").split("\n");
+    const parts = [];
+    let textBuffer = [];
+
+    const flushText = () => {
+      const joined = textBuffer.join("\n").trim();
+      if (joined) parts.push(`<p class="chat-text">${formatInline(escapeHtml(joined))}</p>`);
+      textBuffer = [];
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+      const isTableStart =
+        lines[i].trim().startsWith("|") &&
+        i + 1 < lines.length &&
+        TABLE_SEPARATOR_RE.test(lines[i + 1].trim());
+
+      if (!isTableStart) {
+        textBuffer.push(lines[i]);
+        continue;
+      }
+
+      const tableLines = [lines[i], lines[i + 1]];
+      i += 2;
+      while (i < lines.length && lines[i].trim().startsWith("|")) {
+        tableLines.push(lines[i]);
+        i++;
+      }
+      i--; // compensate for loop increment
+
+      flushText();
+      parts.push(renderMarkdownTable(tableLines));
+    }
+    flushText();
+
+    return parts.join("") || `<p class="chat-text"></p>`;
+  }
+
   function appendChatMessage(role, text) {
     if (!chatThreadList) return;
     const isUser = role === "user";
@@ -1079,7 +1203,7 @@
           <strong class="chat-author">${escapeHtml(authorLabel)}</strong>
           <time class="chat-time">${escapeHtml(timeLabel)}</time>
         </header>
-        <p class="chat-text">${escapeHtml(text)}</p>
+        ${isUser ? `<p class="chat-text">${escapeHtml(text)}</p>` : renderRichChatText(text)}
       </article>
     `;
 
@@ -1128,6 +1252,15 @@
 
     if (btnSendChat) btnSendChat.disabled = true;
     if (chatProgress) chatProgress.removeAttribute("hidden");
+
+    const chatLoader = createThinkingLoader("Generating response", "inline");
+    const chatLoaderItem = document.createElement("li");
+    chatLoaderItem.className = "chat-message chat-model chat-thinking";
+    chatLoaderItem.appendChild(chatLoader.el);
+    if (chatThreadList) {
+      chatThreadList.appendChild(chatLoaderItem);
+      chatLoaderItem.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
     if (chatStatusBadge) chatStatusBadge.textContent = "[STATUS: CONSULTING GEMINI...]";
     if (chatActionStatus) chatActionStatus.textContent = "Gemini analyzing tooling parameters and physical constraints...";
 
@@ -1146,6 +1279,8 @@
 
       if (response.ok) {
         const data = await response.json();
+        chatLoader.stop();
+        chatLoaderItem.remove();
         const reply = data.reply || "";
         chatHistory.push({ role: "user", content: message });
         chatHistory.push({ role: "model", content: reply });
@@ -1163,6 +1298,8 @@
     } catch (networkErr) {
       showChatError("NETWORK_TIMEOUT", networkErr.message || "Please retry sending message.");
     } finally {
+      chatLoader.stop();
+      chatLoaderItem.remove();
       if (btnSendChat) btnSendChat.disabled = false;
       if (chatProgress) chatProgress.setAttribute("hidden", "until-found");
     }
