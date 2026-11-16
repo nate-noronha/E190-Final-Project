@@ -857,6 +857,8 @@ select:focus-visible {
 }
 
 .stark-fieldset {
+  min-width: 0;
+  max-width: 100%;
   border: var(--border-card);
   border-radius: var(--radius-lg);
   padding: 1.15rem;
@@ -1387,6 +1389,9 @@ select:focus-visible {
 }
 
 .chat-fieldset {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
   border: 2px solid transparent;
   border-radius: 26px;
   padding: 0.4rem 0.45rem 0.4rem 0.55rem;
@@ -2660,6 +2665,10 @@ select:focus-visible {
 
   .chat-textarea {
     font-size: 16px;
+  }
+
+  .subhead-title {
+    font-size: 0.98rem;
   }
 }
 
