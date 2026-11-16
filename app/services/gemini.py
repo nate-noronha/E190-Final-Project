@@ -163,8 +163,12 @@ class GeminiService:
         # Import deferred so that missing google-genai at import time does not
         # crash the process; the dependency is optional until this code path is hit.
         from google import genai  # type: ignore[import]
+        from google.genai import types  # type: ignore[import]
 
-        return genai.Client(api_key=api_key)
+        return genai.Client(
+            api_key=api_key,
+            http_options=types.HttpOptions(api_version="v1beta"),
+        )
 
     @staticmethod
     def _wrap_sdk_error(exc: Exception) -> GeminiServiceError:
