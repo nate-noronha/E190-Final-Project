@@ -34,26 +34,12 @@
   const btnToggleRightDrawer = document.getElementById("btn-toggle-right-drawer");
   const btnCloseRightDrawer = document.getElementById("btn-close-right-drawer");
 
-  const btnViewStream = document.getElementById("btn-view-stream");
-  const btnViewBrief = document.getElementById("btn-view-brief");
-  const btnToggleBrief = document.getElementById("btn-toggle-brief");
-  const btnQuickDecompose = document.getElementById("btn-quick-decompose");
   const welcomeHero = document.getElementById("welcome-hero");
   const starterChips = document.querySelectorAll(".starter-chip");
 
   // Subsystems & Copilot Form
   const subsystemBtns = document.querySelectorAll(".subsystem-btn");
   const activeSubsystemBadge = document.getElementById("active-subsystem-badge");
-  const projectForm = document.getElementById("project-form");
-  const projectTitleInput = document.getElementById("project-title-input");
-  const projectDescInput = document.getElementById("project-desc-input");
-  const btnGenerateSteps = document.getElementById("btn-generate-steps");
-  const copilotActionStatus = document.getElementById("copilot-action-status");
-  const generationProgress = document.getElementById("generation-progress");
-  const generationAlert = document.getElementById("generation-alert");
-  const generationAlertTitle = document.getElementById("generation-alert-title");
-  const generationAlertMessage = document.getElementById("generation-alert-message");
-  const btnRetryGenerate = document.getElementById("btn-retry-generate");
 
   // Manufacturing Steps & BOM
   const stepsList = document.getElementById("steps-ordered-list");
@@ -396,35 +382,11 @@
     }
   });
 
-  function setBriefOpen(isOpen) {
-    if (!projectForm) return;
-    projectForm.classList.toggle("is-collapsed", !isOpen);
-    btnToggleBrief?.setAttribute("aria-expanded", isOpen ? "true" : "false");
-    btnViewBrief?.classList.toggle("active", isOpen);
-    btnViewStream?.classList.toggle("active", !isOpen);
-  }
-
-  btnToggleBrief?.addEventListener("click", () => {
-    const isCurrentlyCollapsed = projectForm?.classList.contains("is-collapsed");
-    setBriefOpen(Boolean(isCurrentlyCollapsed));
-  });
-
-  btnViewBrief?.addEventListener("click", () => {
-    setBriefOpen(true);
-    projectForm?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  });
-
-  btnViewStream?.addEventListener("click", () => {
-    setBriefOpen(false);
-  });
-
   // Starter Chips in Watts Welcome Hero
   starterChips.forEach((chip) => {
     chip.addEventListener("click", () => {
       const title = chip.dataset.starterTitle || "";
       const desc = chip.dataset.starterDesc || "";
-      if (projectTitleInput && title) projectTitleInput.value = title;
-      if (projectDescInput && desc) projectDescInput.value = desc;
       if (topbarProjectTitle && title) topbarProjectTitle.textContent = title;
       if (chatInput) {
         chatInput.value = `${title}: ${desc}`;
@@ -453,8 +415,6 @@
     markActiveProjectInSidebar("data-project-preset", presetKey);
 
     if (topbarProjectTitle) topbarProjectTitle.textContent = preset.title;
-    if (projectTitleInput) projectTitleInput.value = preset.title;
-    if (projectDescInput) projectDescInput.value = preset.description;
 
     renderGeneratedSteps(preset.steps);
     renderBOMTable(preset.bom_items);
@@ -477,8 +437,6 @@
       markActiveProjectInSidebar("data-project-id", String(proj.id));
 
       if (topbarProjectTitle) topbarProjectTitle.textContent = proj.title;
-      if (projectTitleInput) projectTitleInput.value = proj.title;
-      if (projectDescInput) projectDescInput.value = proj.description;
 
       renderGeneratedSteps(proj.steps || []);
       renderBOMTable(proj.bom_items || []);
@@ -537,10 +495,7 @@
     currentProjectId = null;
     markActiveProjectInSidebar("data-project-id", "__none__");
     if (topbarProjectTitle) topbarProjectTitle.textContent = "New Hardware Prototype";
-    if (projectTitleInput) projectTitleInput.value = "";
-    if (projectDescInput) projectDescInput.value = "";
     if (welcomeHero) welcomeHero.removeAttribute("hidden");
-    setBriefOpen(true);
     if (chatInput) {
       chatInput.value = "";
       chatInput.focus();
@@ -908,32 +863,7 @@
   }
 
   /* ==========================================================================
-     9. HONEST FAILURE UI RENDERING (<aside class="stark-alert-box" role="alert">)
-     ========================================================================== */
-  function showGenerationError(errorCode, errorDetail) {
-    if (!generationAlert || !generationAlertMessage) return;
-
-    setBriefOpen(true);
-
-    if (generationAlertTitle) {
-      generationAlertTitle.textContent = `DECOMPOSITION FAILED • [${errorCode}]`;
-    }
-    generationAlertMessage.textContent = `${errorCode}: ${errorDetail}`;
-    generationAlert.removeAttribute("hidden");
-
-    if (copilotActionStatus) {
-      copilotActionStatus.textContent = `Error: ${errorCode}. Review diagnostic banner above.`;
-    }
-  }
-
-  function hideGenerationError() {
-    if (generationAlert) {
-      generationAlert.setAttribute("hidden", "until-found");
-    }
-  }
-
-  /* ==========================================================================
-     10. PROJECT DECOMPOSITION DISPATCH (EXPLICIT USER ACTION ONLY)
+     10. THINKING LOADER
      ========================================================================== */
   /* --------------------------------------------------------------------------
      Large "thinking" loader shown while Gemini is working.
@@ -966,148 +896,6 @@
       },
     };
   }
-
-  async function triggerStepGeneration(projectId) {
-    hideGenerationError();
-
-    const planLoader = createThinkingLoader("Generating build plan", "block");
-    const stepsSection = document.querySelector(".manufacturing-flow");
-    if (stepsSection?.parentNode) {
-      stepsSection.parentNode.insertBefore(planLoader.el, stepsSection);
-      planLoader.el.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-
-    if (btnGenerateSteps) {
-      btnGenerateSteps.disabled = true;
-      btnGenerateSteps.textContent = "DECOMPOSING MANUFACTURING PLAN...";
-    }
-    if (btnQuickDecompose) {
-      btnQuickDecompose.disabled = true;
-      btnQuickDecompose.textContent = "Decomposing...";
-    }
-    if (generationProgress) {
-      generationProgress.removeAttribute("hidden");
-    }
-    if (copilotActionStatus) {
-      copilotActionStatus.textContent = "Dispatched decomposition to Gemini 2.0 API. Synthesizing fabrication plan...";
-    }
-
-    try {
-      const response = await fetch(`/api/projects/${projectId}/generate-steps`, {
-        method: "POST",
-        headers: { Accept: "application/json" },
-      });
-
-      if (response.ok) {
-        const projectData = await response.json();
-        currentProjectId = projectData.id;
-        hideGenerationError();
-
-        if (topbarProjectTitle && projectData.title) {
-          topbarProjectTitle.textContent = projectData.title;
-        }
-        upsertProjectInSidebar(projectData);
-        renderGeneratedSteps(projectData.steps || []);
-        renderBOMTable(projectData.bom_items || []);
-
-        const lockCount = (projectData.steps || []).filter((s) => s.requires_steward_signoff).length;
-        if (copilotActionStatus) {
-          copilotActionStatus.textContent = `Plan decomposed into ${projectData.steps.length} sequential operations with ${lockCount} steward safety sign-off gates.`;
-        }
-      } else {
-        const errPayload = await response.json().catch(() => ({}));
-        const errCode = errPayload.error || `HTTP_${response.status}`;
-        const errMsg = errPayload.message || response.statusText || "Decomposition service unavailable.";
-        showGenerationError(errCode, errMsg);
-      }
-    } catch (networkErr) {
-      showGenerationError("NETWORK_TIMEOUT", networkErr.message || "Please retry connecting to server.");
-    } finally {
-      planLoader.stop();
-      if (btnGenerateSteps) {
-        btnGenerateSteps.disabled = false;
-        btnGenerateSteps.textContent = "DECOMPOSE INTO MANUFACTURING PLAN →";
-      }
-      if (btnQuickDecompose) {
-        btnQuickDecompose.disabled = false;
-        btnQuickDecompose.textContent = "Decompose Plan";
-      }
-      if (generationProgress) {
-        generationProgress.setAttribute("hidden", "until-found");
-      }
-    }
-  }
-
-  async function handleProjectSubmit() {
-    const title = (projectTitleInput?.value || "").trim() || "Hardware Prototype";
-    const description = (projectDescInput?.value || "").trim() || "Machining specification brief";
-
-    hideGenerationError();
-
-    if (topbarProjectTitle) {
-      topbarProjectTitle.textContent = title;
-    }
-    if (copilotActionStatus) {
-      copilotActionStatus.textContent = "Initializing student context and project specification...";
-    }
-
-    try {
-      const studentId = await ensureStudentUser();
-      const createRes = await fetch("/api/projects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          title: title,
-          description: description,
-          student_id: studentId || 1,
-        }),
-      });
-
-      if (!createRes.ok) {
-        const errJson = await createRes.json().catch(() => ({}));
-        showGenerationError("PROJECT_CREATION_FAILED", errJson.detail || "Could not persist project record.");
-        return;
-      }
-
-      const project = await createRes.json();
-      currentProjectId = project.id;
-      upsertProjectInSidebar(project);
-
-      await triggerStepGeneration(currentProjectId);
-    } catch (err) {
-      showGenerationError("NETWORK_TIMEOUT", err.message || "Please check connection and retry.");
-    }
-  }
-
-  btnGenerateSteps?.addEventListener("click", handleProjectSubmit);
-  projectForm?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    handleProjectSubmit();
-  });
-
-  // Quick Decompose button inside the bottom ChatGPT prompt bar
-  btnQuickDecompose?.addEventListener("click", () => {
-    const promptVal = (chatInput?.value || "").trim();
-    if (promptVal) {
-      const firstSentence = promptVal.split(/[.:;\n]/)[0].trim();
-      const derivedTitle = firstSentence.slice(0, 60) || "Custom Hardware Prototype";
-      if (projectTitleInput) projectTitleInput.value = derivedTitle;
-      if (projectDescInput) projectDescInput.value = promptVal;
-      if (chatInput) chatInput.value = "";
-    }
-    handleProjectSubmit();
-  });
-
-  btnRetryGenerate?.addEventListener("click", () => {
-    if (currentProjectId) {
-      triggerStepGeneration(currentProjectId);
-    } else {
-      handleProjectSubmit();
-    }
-  });
 
   /* ==========================================================================
      11. CONVERSATIONAL REFINEMENT (CHAT)
@@ -1181,15 +969,75 @@
     return `<figure class="table-container chat-table"><table class="stark-table"><thead><tr>${headHtml}</tr></thead><tbody>${bodyHtml}</tbody></table></figure>`;
   }
 
+  /* --------------------------------------------------------------------------
+     JSON plan blocks: Gemini sometimes replies with a fenced ```json block
+     containing a project plan. Convert it into readable plain text, one
+     paragraph per step, before the rest of the rich rendering runs.
+     -------------------------------------------------------------------------- */
+  const JSON_FENCE_RE = /```(?:json)?\s*\n?([\s\S]*?)(?:```|$)/gi;
+
+  function humanize(value) {
+    return String(value ?? "")
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
+  function planJsonToPlainText(plan) {
+    const out = [];
+    if (plan.title) out.push(`**${plan.title}**`);
+    if (plan.description) out.push(plan.description);
+
+    const steps = Array.isArray(plan.steps) ? plan.steps : [];
+    steps.forEach((step, idx) => {
+      const num = step.step_number ?? idx + 1;
+      const heading = step.title ? `**Step ${num}: ${step.title}**` : `**Step ${num}**`;
+      const body = step.instructions || step.description || "";
+      const meta = [];
+      if (step.facility) meta.push(`Facility: ${humanize(step.facility)}`);
+      if (step.subsystem) meta.push(`Subsystem: ${humanize(step.subsystem)}`);
+      if (step.requires_steward_signoff || step.safety_level === "steward_sign_off_required") {
+        meta.push("Steward sign-off required");
+      } else if (step.safety_level) {
+        meta.push(`Safety: ${humanize(step.safety_level)}`);
+      }
+      out.push([heading, body, meta.join(" · ")].filter(Boolean).join("\n"));
+    });
+
+    return out.join("\n\n");
+  }
+
+  function convertJsonBlocks(text) {
+    return String(text ?? "").replace(JSON_FENCE_RE, (match, inner) => {
+      const trimmed = inner.trim();
+      if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) return match;
+      try {
+        const parsed = JSON.parse(trimmed);
+        const plan = Array.isArray(parsed) ? { steps: parsed } : parsed;
+        if (plan && (Array.isArray(plan.steps) || plan.title || plan.description)) {
+          return `\n\n${planJsonToPlainText(plan)}\n\n`;
+        }
+      } catch (_) {
+        /* not valid JSON (e.g. truncated) — fall through and strip the fence */
+      }
+      return `\n\n${trimmed}\n\n`;
+    });
+  }
+
   function renderRichChatText(text) {
-    const lines = String(text ?? "").split("\n");
+    const lines = convertJsonBlocks(text).split("\n");
     const parts = [];
     let textBuffer = [];
 
     const flushText = () => {
       const joined = textBuffer.join("\n").trim();
-      if (joined) parts.push(`<p class="chat-text">${formatInline(escapeHtml(joined))}</p>`);
       textBuffer = [];
+      if (!joined) return;
+      // One <p> per blank-line-separated chunk so steps read as paragraphs.
+      joined
+        .split(/\n\s*\n+/)
+        .map((para) => para.trim())
+        .filter(Boolean)
+        .forEach((para) => parts.push(`<p class="chat-text">${formatInline(escapeHtml(para))}</p>`));
     };
 
     for (let i = 0; i < lines.length; i++) {
@@ -1260,8 +1108,8 @@
             Accept: "application/json",
           },
           body: JSON.stringify({
-            title: projectTitleInput?.value?.trim() || "Hardware Project",
-            description: projectDescInput?.value?.trim() || "Specification brief",
+            title: message.split(/[.:;\n]/)[0].trim().slice(0, 60) || "Hardware Project",
+            description: message,
             student_id: studentId || 1,
           }),
         });
@@ -1269,8 +1117,9 @@
           const newProj = await createRes.json();
           currentProjectId = newProj.id;
           upsertProjectInSidebar(newProj);
+          if (topbarProjectTitle) topbarProjectTitle.textContent = newProj.title;
         } else {
-          showChatError("PROJECT_INIT_FAILED", "Please formulate project brief above first.");
+          showChatError("PROJECT_INIT_FAILED", "Could not create a project for this conversation.");
           return;
         }
       } catch (e) {
@@ -1788,7 +1637,7 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           project_id: currentProjectId || 1,
-          part_name: projectTitleInput?.value?.trim() || "Chassis Blank",
+          part_name: topbarProjectTitle?.textContent?.trim() || "Chassis Blank",
           format: "stl",
         }),
       });
