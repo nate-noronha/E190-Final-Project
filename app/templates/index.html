@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Harvey Mudd College E190 Hardware & Machining Prototyping Assistant. ChatGPT-style workspace styled after the HMC Makerspace (make.hmc.edu) for engineering workflows, safety gates, and stockroom inventory.">
+  <meta name="description" content="Harvey Mudd College E190 Hardware & Machining Prototyping Assistant. ChatGPT-style workspace styled after the HMC Makerspace (make.hmc.edu) for engineering workflows and stockroom inventory.">
   <title>MAKE &bull; HMC E190 Prototyping Assistant</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Lexend:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/style.css?v=7">
-  <script src="/static/js/app.js?v=7" defer></script>
+  <link rel="stylesheet" href="/static/css/style.css?v=8">
+  <script src="/static/js/app.js?v=8" defer></script>
 </head>
 <body class="app-shell">
 
@@ -56,17 +56,6 @@
         <span>COLLEGE</span>
       </figure>
 
-      <fieldset class="role-switcher-fieldset" role="radiogroup" aria-label="Active Persona Switcher">
-        <legend class="sr-only">Active Persona Switcher</legend>
-        <label class="role-pill active" id="label-role-student" for="role-student">
-          <input type="radio" name="user-role" id="role-student" value="student" checked>
-          <span>[STUDENT]</span>
-        </label>
-        <label class="role-pill" id="label-role-steward" for="role-steward">
-          <input type="radio" name="user-role" id="role-steward" value="steward">
-          <span>[STEWARD]</span>
-        </label>
-      </fieldset>
 
       <nav class="footer-nav" aria-label="Quick System Links">
         <ul class="footer-links-list">
@@ -76,7 +65,7 @@
         </ul>
       </nav>
       <small id="safety-disclaimer" class="colophon-disclaimer">
-        Always obtain in-person steward sign-off before operating hazardous shop machinery.
+        Always follow posted shop safety rules and wear proper PPE when operating machinery.
       </small>
     </footer>
   </aside>
@@ -99,7 +88,6 @@
       <section class="topbar-right">
         <button type="button" id="btn-toggle-right-drawer" class="btn-drawer-toggle" aria-expanded="false" aria-controls="right-tools-drawer">
           <span class="drawer-toggle-label">Subsystems &amp; Shop Tools</span>
-          <span class="badge-count" id="safety-queue-count">3</span>
         </button>
       </section>
     </header>
@@ -153,7 +141,7 @@
                 <strong class="chat-author">[ASSISTANT &bull; GEMINI 2.0]</strong>
                 <time class="chat-time">SYSTEM</time>
               </header>
-              <p class="chat-text">Welcome to the E190 Prototyping Assistant. Describe a new build or ask specific questions in the prompt bar below, or click "Subsystems &amp; Shop Tools" in the top-right to inspect BOM parts, Campus Stockroom inventory, Steward Safety Queue, or 3D CAD.</p>
+              <p class="chat-text">Welcome to the E190 Prototyping Assistant. Describe a new build or ask specific questions in the prompt bar below, or click "Subsystems &amp; Shop Tools" in the top-right to inspect BOM parts, Campus Stockroom inventory, or 3D CAD.</p>
             </article>
           </li>
         </ul>
@@ -178,7 +166,7 @@
   </main>
 
   <!-- =================================================================== -->
-  <!-- RIGHT EXPANDABLE PANEL: SUBSYSTEMS, BOM, STEWARD, STOCKROOM & CAD   -->
+  <!-- RIGHT EXPANDABLE PANEL: SUBSYSTEMS, BOM, STOCKROOM & CAD   -->
   <!-- (COLLAPSED BY DEFAULT — OPENS ON USER TOGGLE)                       -->
   <!-- =================================================================== -->
   <aside id="right-tools-drawer" class="sidebar-right is-collapsed" aria-label="Subsystems and Shop Tools">
@@ -199,18 +187,13 @@
           </button>
         </li>
         <li class="nav-item">
-          <button type="button" class="nav-tab" data-tab="tab-steward" id="btn-tab-steward" aria-controls="tab-steward" aria-selected="false">
-            <span class="tab-order">II.</span> STEWARD QUEUE
-          </button>
-        </li>
-        <li class="nav-item">
           <button type="button" class="nav-tab" data-tab="tab-stockroom" id="btn-tab-stockroom" aria-controls="tab-stockroom" aria-selected="false">
-            <span class="tab-order">III.</span> CAMPUS STOCKROOM
+            <span class="tab-order">II.</span> CAMPUS STOCKROOM
           </button>
         </li>
         <li class="nav-item">
           <button type="button" class="nav-tab" data-tab="tab-cad" id="btn-tab-cad" aria-controls="tab-cad" aria-selected="false">
-            <span class="tab-order">IV.</span> 3D CAD PREVIEW
+            <span class="tab-order">III.</span> 3D CAD PREVIEW
           </button>
         </li>
       </ul>
@@ -317,107 +300,7 @@
     </section>
 
     <!-- ================================================================= -->
-    <!-- TAB 2: STEWARD SAFETY QUEUE (STEWARD VIEW)                       -->
-    <!-- ================================================================= -->
-    <section id="tab-steward" class="view-panel" aria-labelledby="btn-tab-steward" hidden>
-      <header class="panel-header">
-        <span class="panel-order-tag">[MODULE: SHOP FLOOR OVERSIGHT]</span>
-        <h2 class="panel-title">STEWARD SAFETY QUEUE &bull; AUTHORIZATION DESK</h2>
-        <p class="panel-desc">Review student sign-off requests, inspect tooling setups, and authorize hazardous manufacturing operations across Harvey Mudd shops.</p>
-      </header>
-
-      <!-- Facility Filter Nav -->
-      <nav class="facility-nav" aria-label="Steward Facility Filters">
-        <ul class="facility-filter-list">
-          <li><button type="button" class="facility-pill active" data-queue-filter="all">ALL FACILITIES</button></li>
-          <li><button type="button" class="facility-pill" data-queue-filter="machine_shop">[MACHINE_SHOP]</button></li>
-          <li><button type="button" class="facility-pill" data-queue-filter="wood_shop">[WOOD_SHOP]</button></li>
-          <li><button type="button" class="facility-pill" data-queue-filter="ee_stockroom">[EE_STOCKROOM]</button></li>
-          <li><button type="button" class="facility-pill" data-queue-filter="makerspace">[MAKERSPACE]</button></li>
-        </ul>
-      </nav>
-
-      <!-- Queue Cards List -->
-      <ul class="steward-queue-list" id="steward-queue-container">
-        <!-- Item 1: Machine Shop -->
-        <li class="queue-item" data-facility="machine_shop">
-          <article class="steward-card">
-            <header class="card-header-bar">
-              <span class="facility-badge">[MACHINE_SHOP]</span>
-              <time class="card-timestamp" datetime="2026-11-03T09:15:00Z">09:15 AM TODAY</time>
-            </header>
-            <h3 class="queue-operation-title">Bridgeport Mill Precision Keyway Slotting</h3>
-            <p class="queue-student-meta">
-              Student: <strong>Nathan Noronha</strong> &bull; Project: <em>Sun-Tracker Gimbal</em> &bull; Step: <kbd>OP 02</kbd>
-            </p>
-            <p class="queue-risk-brief">
-              <strong>Risk Hazard:</strong> High-speed carbide end mill, spindle entanglement, and projectile chips in 6061-T6 aluminum. Verify vise torque and eye protection.
-            </p>
-            <footer class="queue-card-actions">
-              <button type="button" class="btn-steward-approve" data-step-id="step-02" data-step-title="Bridgeport Mill Keyway Slotting" data-facility="machine_shop">
-                APPROVE SIGN-OFF
-              </button>
-              <button type="button" class="btn-steward-flag" data-step-id="step-02" data-step-title="Bridgeport Mill Keyway Slotting" data-facility="machine_shop">
-                FLAG FOR REVISION
-              </button>
-            </footer>
-          </article>
-        </li>
-
-        <!-- Item 2: Makerspace -->
-        <li class="queue-item" data-facility="makerspace">
-          <article class="steward-card">
-            <header class="card-header-bar">
-              <span class="facility-badge">[MAKERSPACE]</span>
-              <time class="card-timestamp" datetime="2026-11-03T09:22:00Z">09:22 AM TODAY</time>
-            </header>
-            <h3 class="queue-operation-title">Boss Laser 60W Acrylic Base Plate Cutting</h3>
-            <p class="queue-student-meta">
-              Student: <strong>Elena Rostova</strong> &bull; Project: <em>Spectrometer Enclosure</em> &bull; Step: <kbd>OP 01</kbd>
-            </p>
-            <p class="queue-risk-brief">
-              <strong>Risk Hazard:</strong> Combustible fumes, laser reflection, and honeycomb flare-up. Verify compressed air assist is active and exhaust fan running.
-            </p>
-            <footer class="queue-card-actions">
-              <button type="button" class="btn-steward-approve" data-step-id="step-boss-laser" data-step-title="Boss Laser 60W Acrylic Cut" data-facility="makerspace">
-                APPROVE SIGN-OFF
-              </button>
-              <button type="button" class="btn-steward-flag" data-step-id="step-boss-laser" data-step-title="Boss Laser 60W Acrylic Cut" data-facility="makerspace">
-                FLAG FOR REVISION
-              </button>
-            </footer>
-          </article>
-        </li>
-
-        <!-- Item 3: Wood Shop -->
-        <li class="queue-item" data-facility="wood_shop">
-          <article class="steward-card">
-            <header class="card-header-bar">
-              <span class="facility-badge">[WOOD_SHOP]</span>
-              <time class="card-timestamp" datetime="2026-11-03T09:30:00Z">09:30 AM TODAY</time>
-            </header>
-            <h3 class="queue-operation-title">SawStop Cabinet Table Saw Ripping</h3>
-            <p class="queue-student-meta">
-              Student: <strong>Marcus Vance</strong> &bull; Project: <em>Acoustic Resonator Frame</em> &bull; Step: <kbd>OP 04</kbd>
-            </p>
-            <p class="queue-risk-brief">
-              <strong>Risk Hazard:</strong> High kinetic energy blade and kickback risk. Confirm riving knife installed, push stick ready, and blade guard in place.
-            </p>
-            <footer class="queue-card-actions">
-              <button type="button" class="btn-steward-approve" data-step-id="step-sawstop" data-step-title="SawStop Table Saw Ripping" data-facility="wood_shop">
-                APPROVE SIGN-OFF
-              </button>
-              <button type="button" class="btn-steward-flag" data-step-id="step-sawstop" data-step-title="SawStop Table Saw Ripping" data-facility="wood_shop">
-                FLAG FOR REVISION
-              </button>
-            </footer>
-          </article>
-        </li>
-      </ul>
-    </section>
-
-    <!-- ================================================================= -->
-    <!-- TAB 3: CAMPUS STOCKROOM (INVENTORY BROWSER)                      -->
+    <!-- TAB 2: CAMPUS STOCKROOM (INVENTORY BROWSER)                      -->
     <!-- ================================================================= -->
     <section id="tab-stockroom" class="view-panel" aria-labelledby="btn-tab-stockroom" hidden>
       <header class="panel-header">
@@ -562,20 +445,20 @@
           <h4 class="placeholder-title">BULK CSV INVENTORY UPLOAD MODULE</h4>
         </header>
         <p class="placeholder-text">
-          Shop stewards can perform bulk batch sync of stockroom CSV spreadsheets directly into PostgreSQL.
+          Perform a bulk batch sync of stockroom CSV spreadsheets directly into PostgreSQL.
           Headers required: <code>sku, name, category, facility, location, quantity, unit</code>.
         </p>
         <form id="csv-upload-form" class="stark-form" onsubmit="return false;">
           <label for="csv-text-input" class="stark-label">CSV SPREADSHEET PAYLOAD</label>
           <textarea id="csv-text-input" class="stark-textarea" rows="4" placeholder="sku,name,category,facility,location,quantity,unit&#10;MS-AL-6061,6061 Aluminum Plate,Raw Stock,machine_shop,Bin MS-01,15,pcs&#10;MK-PLA-BLK,Black PLA 1.75mm,Filament,makerspace,Bin MK-02,25,spools"></textarea>
           <button type="button" id="btn-upload-csv" class="btn-action-primary">IMPORT INVENTORY CSV &rarr;</button>
-          <p id="csv-upload-status" class="action-status-pill" role="status" aria-live="polite">Ready for steward batch sync.</p>
+          <p id="csv-upload-status" class="action-status-pill" role="status" aria-live="polite">Ready for batch sync.</p>
         </form>
       </aside>
     </section>
 
     <!-- ================================================================= -->
-    <!-- TAB 4: 3D CAD PREVIEW (CLASSMATE TOOL INTEGRATION HARNESS)       -->
+    <!-- TAB 3: 3D CAD PREVIEW (CLASSMATE TOOL INTEGRATION HARNESS)       -->
     <!-- ================================================================= -->
     <section id="tab-cad" class="view-panel" aria-labelledby="btn-tab-cad" hidden>
       <header class="panel-header">
@@ -646,55 +529,6 @@
     </section>
   </aside>
 
-  <!-- =================================================================== -->
-  <!-- NATIVE SEMANTIC MODAL DIALOG: SAFETY SIGN-OFF                      -->
-  <!-- =================================================================== -->
-  <dialog id="safety-modal" class="stark-dialog" aria-labelledby="dialog-heading">
-    <form method="dialog" class="dialog-form" id="dialog-signoff-form">
-      <header class="dialog-header">
-        <span class="dialog-badge">[STEWARD SHOP SAFETY CLEARANCE]</span>
-        <h3 id="dialog-heading" class="dialog-title">AUTHORIZE MACHINING OPERATION</h3>
-        <button type="button" class="btn-dialog-close" id="btn-dialog-close" aria-label="Close dialog">&times;</button>
-      </header>
-
-      <section class="dialog-body">
-        <article class="dialog-target-summary">
-          <h4 class="dialog-target-title" id="dialog-step-title">Bridgeport Mill Precision Keyway Slotting</h4>
-          <span class="facility-badge" id="dialog-facility-badge">[MACHINE_SHOP]</span>
-        </article>
-
-        <fieldset class="stark-fieldset checklist-box">
-          <legend class="stark-legend">MANDATORY PRE-OPERATION SAFETY VERIFICATION</legend>
-          <label class="check-item-label" for="chk-ppe">
-            <input type="checkbox" id="chk-ppe" required>
-            <span>Personal Protective Equipment (ANSI Z87.1 glasses, closed-toe shoes, hair tied)</span>
-          </label>
-          <label class="check-item-label" for="chk-fixture">
-            <input type="checkbox" id="chk-fixture" required>
-            <span>Vise fixturing, parallel seating, and clamping torque physically inspected</span>
-          </label>
-          <label class="check-item-label" for="chk-speeds">
-            <input type="checkbox" id="chk-speeds" required>
-            <span>Spindle speed (RPM) and feed rate verified for workpiece material</span>
-          </label>
-          <label class="check-item-label" for="chk-estop">
-            <input type="checkbox" id="chk-estop" required>
-            <span>Emergency Stop (E-Stop) switch location and functionality confirmed</span>
-          </label>
-        </fieldset>
-
-        <label for="dialog-steward-notes" class="stark-label">STEWARD VERIFICATION LOG &amp; INSTRUCTIONS</label>
-        <textarea id="dialog-steward-notes" class="stark-textarea" rows="3" placeholder="Enter fixture inspection notes, student badge number, or required tooling adjustments..."></textarea>
-      </section>
-
-      <footer class="dialog-footer">
-        <button type="button" class="btn-action-cancel" id="btn-dialog-cancel">CANCEL</button>
-        <button type="submit" class="btn-action-primary" id="btn-dialog-confirm">
-          AUTHORIZE &amp; UNLOCK STEP
-        </button>
-      </footer>
-    </form>
-  </dialog>
 
 </body>
 </html>

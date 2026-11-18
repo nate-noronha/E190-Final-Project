@@ -4,7 +4,7 @@ Automated Compliance Directive Suite (Slice 6).
 Asserts the 6 non-negotiable architectural invariants:
 1. Zero <div> soup in HTML templates and dynamic frontend JavaScript.
 2. Zero LLM calls on page load or any GET endpoint.
-3. Strict Steward Safety Gate invariant (hazardous steps cannot be completed without steward sign-off).
+3. Step completion is not gated on steward sign-off (sign-off workflow removed).
 4. Relational durability across engine resets (reset_engine()).
 5. Zero secrets tracked in git or hardcoded in source files.
 6. Honest error envelopes (503 on missing key, retryable diagnostics).
@@ -96,15 +96,11 @@ def test_directive_2_zero_page_load_llm(client, monkeypatch):
         r_proj = client.get("/api/projects")
         assert r_proj.status_code == 200
 
-        # 4. Read steward queue
-        r_steward = client.get("/api/steward/pending-signoffs")
-        assert r_steward.status_code == 200
-
-        # 5. Read inventory
+        # 4. Read inventory
         r_inv = client.get("/api/inventory")
         assert r_inv.status_code == 200
 
-        # 6. Read CAD status
+        # 5. Read CAD status
         r_cad = client.get("/api/integrations/cad/status")
         assert r_cad.status_code == 200
 
@@ -120,12 +116,12 @@ def test_directive_2_zero_page_load_llm(client, monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# DIRECTIVE 3: STRICT STEWARD SAFETY GATE INVARIANT
+# DIRECTIVE 3: STEP COMPLETION WITHOUT STEWARD SIGN-OFF
 # ---------------------------------------------------------------------------
 
 
-def test_directive_3_steward_safety_invariant(client, session: Session):
-    """Enforce that hazardous steps cannot be completed without shop steward sign-off."""
+def test_directive_3_steps_complete_without_signoff(client, session: Session):
+    """Steps flagged as hazardous can be completed directly; sign-off endpoints are gone."""
     student = User(name="Student Safety Check", email="safety_student@hmc.edu", role=RoleEnum.STUDENT)
     session.add(student)
     session.commit()
@@ -149,20 +145,21 @@ def test_directive_3_steward_safety_invariant(client, session: Session):
     session.commit()
     session.refresh(haz_step)
 
-    # Invariant A: Student cannot mark completed without sign-off
+    # A: Student can mark the step completed with no sign-off
     res = client.post(
         f"/api/steps/{haz_step.id}/toggle-complete",
         json={"student_id": student.id, "is_completed": True},
     )
-    assert res.status_code == 400
-    assert "Cannot complete step before shop steward safety sign-off" in res.json()["detail"]
+    assert res.status_code == 200
+    assert res.json()["is_completed"] is True
 
-    # Invariant B: Student cannot sign off on safety
-    res_bad_signoff = client.post(
+    # B: Steward sign-off endpoints no longer exist
+    assert client.get("/api/steward/pending-signoffs").status_code == 404
+    res_signoff = client.post(
         f"/api/steps/{haz_step.id}/approve-safety",
-        json={"steward_id": student.id, "notes": "I approve myself"},
+        json={"steward_id": student.id, "notes": "n/a"},
     )
-    assert res_bad_signoff.status_code == 403
+    assert res_signoff.status_code in (404, 405)
 
 
 # ---------------------------------------------------------------------------

@@ -14,7 +14,7 @@ from app.routers.health import router as health_router
 from app.routers.integrations import router as integrations_router
 from app.routers.inventory import router as inventory_router
 from app.routers.projects import router as projects_router
-from app.routers.steward import router as steward_router
+from app.routers.steps import router as steps_router
 from app.routers.users import router as users_router
 
 logger = logging.getLogger(__name__)
@@ -50,7 +50,7 @@ app = FastAPI(
     title="E190 Hardware & Machining Prototyping Assistant",
     description=(
         "Backend API for HMC E190 — breaks down physical engineering projects into "
-        "step-by-step instructions, integrates steward safety sign-offs, and tracks "
+        "step-by-step instructions and tracks "
         "makerspace/stockroom inventory."
     ),
     version="0.1.0",
@@ -74,7 +74,7 @@ async def read_root():
 app.include_router(health_router)
 app.include_router(users_router)
 app.include_router(projects_router)
-app.include_router(steward_router)
+app.include_router(steps_router)
 app.include_router(inventory_router)
 app.include_router(integrations_router)
 

@@ -18,9 +18,6 @@
   const connectionText = document.getElementById("connection-status-text");
   const navTabs = document.querySelectorAll(".nav-tab");
   const viewPanels = document.querySelectorAll(".view-panel");
-  const roleRadios = document.querySelectorAll('input[name="user-role"]');
-  const roleStudentLabel = document.getElementById("label-role-student");
-  const roleStewardLabel = document.getElementById("label-role-steward");
 
   // 3-Column Layout & Drawer Controls
   const projectsSidebar = document.getElementById("projects-sidebar");
@@ -59,25 +56,12 @@
   const chatAlertMessage = document.getElementById("chat-alert-message");
   const btnRetryChat = document.getElementById("btn-retry-chat");
 
-  // Safety Modal & Actions
-  const safetyModal = document.getElementById("safety-modal");
-  const dialogSignoffForm = document.getElementById("dialog-signoff-form");
-  const btnDialogClose = document.getElementById("btn-dialog-close");
-  const btnDialogCancel = document.getElementById("btn-dialog-cancel");
-  const dialogStepTitle = document.getElementById("dialog-step-title");
-  const dialogFacilityBadge = document.getElementById("dialog-facility-badge");
-  const safetyQueueCount = document.getElementById("safety-queue-count");
-
-  // Steward Queue & Stockroom Filters
-  const queueFilterBtns = document.querySelectorAll(".facility-pill");
   const inventorySearch = document.getElementById("inventory-search-input");
   const facilitySelect = document.getElementById("facility-select-dropdown");
 
   // State
   let currentActiveStudentId = null;
-  let currentActiveStewardId = null;
   let currentProjectId = null;
-  let currentPendingStepId = null;
   let currentSubsystemFilter = "all";
   let cachedSteps = [];
   let chatHistory = [];
@@ -98,7 +82,6 @@
           instructions:
             'Chuck 2.00" 6061-T6 round bar stock into 3-jaw chuck. Face both ends flat and turn outer diameter down to 48.00 mm ± 0.05 mm over 110 mm length. Apply cutting oil and calibrate dial calipers.',
           facility: "machine_shop",
-          requires_steward_signoff: false,
           is_completed: false,
         },
         {
@@ -109,9 +92,6 @@
           instructions:
             "Clamp prepared shaft in milling vise with parallels. End mill 6.00 mm keyway slot at 1200 RPM using 4-flute solid carbide center-cutting end mill. Depth of cut 3.50 mm.",
           facility: "machine_shop",
-          requires_steward_signoff: true,
-          safety_notes:
-            "Risk Level: HIGH. High-speed spindle chips and workpiece deflection risk. A certified shop steward must inspect vise fixturing, parallel seating, and RPM configuration before spindle start.",
           is_completed: false,
         },
         {
@@ -122,7 +102,6 @@
           instructions:
             "Clean bearing journals with isopropanol. Apply thin film of Loctite 609 retaining compound. Press dual 608-2RS ball bearings into reamed bores using hand arbor press.",
           facility: "machine_shop",
-          requires_steward_signoff: false,
           is_completed: false,
         },
       ],
@@ -157,7 +136,7 @@
         },
       ],
       assistantWelcome:
-        "Loaded Dual-Axis Solar Tracker Gimbal Assembly. OP 02 (Bridgeport Keyway Slotting) requires Steward Safety Sign-off before completion. Ask any question below or open Subsystems & Shop Tools in the top-right.",
+        "Loaded Dual-Axis Solar Tracker Gimbal Assembly. Ask any question below or open Subsystems & Shop Tools in the top-right.",
     },
     "pendulum-cart": {
       title: "Inverted Pendulum Linear Cart",
@@ -172,9 +151,6 @@
           instructions:
             "Mount 12.00 mm 303 stainless rod in collet chuck. Turn stepped shoulder to 10.00 mm ± 0.02 mm for linear ball bushing fit.",
           facility: "machine_shop",
-          requires_steward_signoff: true,
-          safety_notes:
-            "Risk Level: HIGH. Stainless work-hardening hazard on lathe. Steward must verify collet projection length and spindle RPM <= 900.",
           is_completed: false,
         },
         {
@@ -185,7 +161,6 @@
           instructions:
             "Populate ESP32-S3 carrier protoboard at EE Stockroom rework station. Configure I2C 4.7k pull-ups for AS5600 pendulum angle sensor.",
           facility: "ee_stockroom",
-          requires_steward_signoff: false,
           is_completed: false,
         },
         {
@@ -196,7 +171,6 @@
           instructions:
             "Flash timers on ESP32-S3 for 1000 Hz encoder polling and verify emergency limit-switch cutoff.",
           facility: "ee_stockroom",
-          requires_steward_signoff: false,
           is_completed: false,
         },
       ],
@@ -232,9 +206,6 @@
           instructions:
             'Place 1/4" cast acrylic sheet on Makerspace Boss Laser bed. Set air assist ON, exhaust blower HIGH, speed 18 mm/s at 75% power.',
           facility: "makerspace",
-          requires_steward_signoff: true,
-          safety_notes:
-            "Risk Level: HIGH. Combustible acrylic vapor and laser flare-up risk. Steward must verify air assist pressure and optics cleanliness.",
           is_completed: false,
         },
         {
@@ -245,7 +216,6 @@
           instructions:
             "Groove AS568-238 Buna-N O-ring gland to 3.55 mm width x 2.80 mm depth with surface finish Ra <= 0.8 um.",
           facility: "machine_shop",
-          requires_steward_signoff: false,
           is_completed: false,
         },
         {
@@ -256,7 +226,6 @@
           instructions:
             "Apply Dow Corning 111 silicone lubricant to dual O-rings, seat acrylic hull tube, and pull -10 psi vacuum for 30 minutes.",
           facility: "makerspace",
-          requires_steward_signoff: false,
           is_completed: false,
         },
       ],
@@ -277,7 +246,7 @@
         },
       ],
       assistantWelcome:
-        "Loaded Autonomous AUV Pressure Hull. Note that Boss Laser cutting of 1/4\" cast acrylic requires a Makerspace Steward Sign-off.",
+        "Loaded Autonomous AUV Pressure Hull.",
     },
   };
 
@@ -539,9 +508,7 @@
       }
     });
 
-    if (targetTabId === "tab-steward") {
-      loadStewardQueue();
-    } else if (targetTabId === "tab-stockroom") {
+    if (targetTabId === "tab-stockroom") {
       loadInventoryItems();
     }
   }
@@ -554,28 +521,7 @@
   });
 
   /* ==========================================================================
-     5. ROLE SWITCHER (STUDENT <-> STEWARD)
-     ========================================================================== */
-  function handleRoleChange(selectedRole) {
-    if (selectedRole === "steward") {
-      roleStewardLabel?.classList.add("active");
-      roleStudentLabel?.classList.remove("active");
-      switchTab("tab-steward");
-    } else {
-      roleStudentLabel?.classList.add("active");
-      roleStewardLabel?.classList.remove("active");
-      switchTab("tab-copilot");
-    }
-  }
-
-  roleRadios.forEach((radio) => {
-    radio.addEventListener("change", (e) => {
-      handleRoleChange(e.target.value);
-    });
-  });
-
-  /* ==========================================================================
-     6. USER MANAGEMENT (STUDENT & STEWARD IDENTITY)
+     6. USER MANAGEMENT (STUDENT IDENTITY)
      ========================================================================== */
   async function ensureStudentUser() {
     if (currentActiveStudentId) return currentActiveStudentId;
@@ -631,62 +577,6 @@
     }
 
     return currentActiveStudentId;
-  }
-
-  async function ensureStewardUser() {
-    if (currentActiveStewardId) return currentActiveStewardId;
-
-    try {
-      const res = await fetch("/api/users?role=steward", {
-        headers: { Accept: "application/json" },
-      });
-      if (res.ok) {
-        const users = await res.json();
-        if (Array.isArray(users) && users.length > 0) {
-          currentActiveStewardId = users[0].id;
-          return currentActiveStewardId;
-        }
-      }
-    } catch (e) {
-      // ignore and attempt POST
-    }
-
-    try {
-      const createRes = await fetch("/api/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          name: "Shop Steward Alex",
-          email: "steward@hmc.edu",
-          role: "steward",
-        }),
-      });
-
-      if (createRes.ok) {
-        const newUser = await createRes.json();
-        currentActiveStewardId = newUser.id;
-        return currentActiveStewardId;
-      } else if (createRes.status === 409) {
-        const retryRes = await fetch("/api/users?role=steward", {
-          headers: { Accept: "application/json" },
-        });
-        if (retryRes.ok) {
-          const list = await retryRes.json();
-          const match = list.find((u) => u.email === "steward@hmc.edu") || list[0];
-          if (match) {
-            currentActiveStewardId = match.id;
-            return currentActiveStewardId;
-          }
-        }
-      }
-    } catch (err) {
-      console.warn("Could not create steward user:", err);
-    }
-
-    return currentActiveStewardId;
   }
 
   /* ==========================================================================
@@ -749,64 +639,22 @@
     cachedSteps.forEach((step, idx) => {
       const stepNumber = String(step.step_order || idx + 1).padStart(2, "0");
       const stepId = step.id || stepNumber;
-      const requiresSignoff = Boolean(step.requires_steward_signoff);
-      const isApproved = Boolean(step.safety_approved_at);
-      const isLocked = requiresSignoff && !isApproved;
       const isCompleted = Boolean(step.is_completed);
       const subsystem = (step.subsystem || "mechanical").toLowerCase();
       const facility = (step.facility || "machine_shop").toLowerCase();
 
       const li = document.createElement("li");
-      li.className = `step-card ${isLocked ? "step-locked" : "step-cleared"}`;
+      li.className = "step-card step-cleared";
       li.id = `step-card-${stepId}`;
       li.dataset.subsystem = subsystem;
 
-      let safetyBarrierHtml = "";
-      let footerStatusHtml = "";
-
-      if (isLocked) {
-        safetyBarrierHtml = `
-          <section class="safety-barrier" aria-label="Safety Sign-off Lock">
-            <span class="barrier-warning-symbol" aria-hidden="true">&#9888;</span>
-            <h5 class="barrier-title">STEWARD SAFETY SIGN-OFF REQUIRED BEFORE OPERATION</h5>
-            <p class="barrier-text">
-              ${escapeHtml(step.safety_notes || "Risk Level: CRITICAL. Certified shop steward physical inspection required prior to machine operation.")}
-            </p>
-            <button type="button" class="btn-request-signoff" data-step-id="${escapeHtml(String(stepId))}" data-step-title="${escapeHtml(step.title)}" data-facility="${escapeHtml(facility)}">
-              REQUEST STEWARD SAFETY SIGN-OFF
-            </button>
-          </section>
-        `;
-        footerStatusHtml = `
-          <footer class="step-status-footer">
-            <span class="safety-tag safety-critical">&bull; Safety Gate Active &mdash; Machine Interlocked</span>
-            <span class="gate-status-pill pill-locked" id="step-${escapeHtml(String(stepId))}-badge">[STATUS: PENDING STEWARD SIGN-OFF]</span>
-            <button type="button" class="btn-toggle-step" data-step-id="${escapeHtml(String(stepId))}" data-completed="${isCompleted ? "true" : "false"}">
-              ${isCompleted ? "[✓ COMPLETED]" : "[MARK OPERATION COMPLETE]"}
-            </button>
-          </footer>
-        `;
-      } else if (requiresSignoff && isApproved) {
-        footerStatusHtml = `
-          <footer class="step-status-footer">
-            <span class="safety-tag safety-normal">&bull; Safety Barrier Unlocked &mdash; Steward Approved</span>
-            <span class="gate-status-pill pill-cleared" id="step-${escapeHtml(String(stepId))}-badge">[STATUS: SAFETY APPROVED]</span>
-            <button type="button" class="btn-toggle-step" data-step-id="${escapeHtml(String(stepId))}" data-completed="${isCompleted ? "true" : "false"}">
-              ${isCompleted ? "[✓ COMPLETED]" : "[MARK OPERATION COMPLETE]"}
-            </button>
-          </footer>
-        `;
-      } else {
-        footerStatusHtml = `
-          <footer class="step-status-footer">
-            <span class="safety-tag safety-normal">&bull; Standard Shop Floor Safety Protocol</span>
-            <span class="gate-status-pill pill-cleared">[STATUS: CLEARED]</span>
-            <button type="button" class="btn-toggle-step" data-step-id="${escapeHtml(String(stepId))}" data-completed="${isCompleted ? "true" : "false"}">
-              ${isCompleted ? "[✓ COMPLETED]" : "[MARK OPERATION COMPLETE]"}
-            </button>
-          </footer>
-        `;
-      }
+      const footerStatusHtml = `
+        <footer class="step-status-footer">
+          <button type="button" class="btn-toggle-step" data-step-id="${escapeHtml(String(stepId))}" data-completed="${isCompleted ? "true" : "false"}">
+            ${isCompleted ? "[✓ COMPLETED]" : "[MARK OPERATION COMPLETE]"}
+          </button>
+        </footer>
+      `;
 
       li.innerHTML = `
         <article class="step-article">
@@ -819,7 +667,6 @@
           <p class="step-instruction">
             ${escapeHtml(step.instructions)}
           </p>
-          ${safetyBarrierHtml}
           ${footerStatusHtml}
         </article>
       `;
@@ -995,11 +842,6 @@
       const meta = [];
       if (step.facility) meta.push(`Facility: ${humanize(step.facility)}`);
       if (step.subsystem) meta.push(`Subsystem: ${humanize(step.subsystem)}`);
-      if (step.requires_steward_signoff || step.safety_level === "steward_sign_off_required") {
-        meta.push("Steward sign-off required");
-      } else if (step.safety_level) {
-        meta.push(`Safety: ${humanize(step.safety_level)}`);
-      }
       out.push([heading, body, meta.join(" · ")].filter(Boolean).join("\n"));
     });
 
@@ -1208,44 +1050,8 @@
   });
 
   /* ==========================================================================
-     12. SAFETY SIGN-OFF MODAL DIALOG (<dialog id="safety-modal">)
+     12. STEP COMPLETION
      ========================================================================== */
-  function openSafetyModal(stepId, stepTitle, facility) {
-    if (!safetyModal) return;
-    currentPendingStepId = stepId;
-
-    if (dialogStepTitle) {
-      dialogStepTitle.textContent = stepTitle || "Precision Machining Operation";
-    }
-    if (dialogFacilityBadge) {
-      dialogFacilityBadge.textContent = `[${(facility || "MACHINE_SHOP").toUpperCase()}]`;
-    }
-
-    if (typeof safetyModal.showModal === "function") {
-      safetyModal.showModal();
-    } else {
-      safetyModal.setAttribute("open", "true");
-    }
-  }
-
-  function closeSafetyModal() {
-    if (!safetyModal) return;
-    if (typeof safetyModal.close === "function") {
-      safetyModal.close();
-    } else {
-      safetyModal.removeAttribute("open");
-    }
-  }
-
-  btnDialogClose?.addEventListener("click", closeSafetyModal);
-  btnDialogCancel?.addEventListener("click", closeSafetyModal);
-
-  safetyModal?.addEventListener("click", (event) => {
-    if (event.target === safetyModal) {
-      closeSafetyModal();
-    }
-  });
-
   stepsList?.addEventListener("click", async (e) => {
     const toggleBtn = e.target.closest(".btn-toggle-step");
     if (toggleBtn) {
@@ -1269,193 +1075,13 @@
           toggleBtn.textContent = updated.is_completed ? "[✓ COMPLETED]" : "[MARK OPERATION COMPLETE]";
         } else {
           const errPayload = await response.json().catch(() => ({}));
-          alert(errPayload.detail || "Cannot complete step before shop steward safety sign-off.");
+          alert(errPayload.detail || "Could not update step completion.");
         }
       } catch (err) {
         alert("Could not update step completion: " + err.message);
       }
       return;
     }
-
-    const reqBtn = e.target.closest(".btn-request-signoff");
-    if (reqBtn) {
-      const stepId = reqBtn.dataset.stepId;
-      const stepTitle = reqBtn.dataset.stepTitle;
-      const facility = reqBtn.dataset.facility;
-      openSafetyModal(stepId, stepTitle, facility);
-    }
-  });
-
-  dialogSignoffForm?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    if (!currentPendingStepId) {
-      closeSafetyModal();
-      return;
-    }
-
-    const stewardId = await ensureStewardUser();
-    const notesInput = document.getElementById("dialog-steward-notes");
-    const notes = (notesInput?.value || "").trim() || "Physical safety check-off completed.";
-
-    try {
-      const response = await fetch(`/api/steps/${currentPendingStepId}/approve-safety`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          steward_id: stewardId || 2,
-          notes: notes,
-        }),
-      });
-
-      if (response.ok) {
-        const stepBadge = document.getElementById(`step-${currentPendingStepId}-badge`);
-        const stepCard = document.getElementById(`step-card-${currentPendingStepId}`);
-        if (stepBadge) {
-          stepBadge.textContent = "[STATUS: SAFETY APPROVED]";
-          stepBadge.className = "gate-status-pill pill-cleared";
-        }
-        if (stepCard) {
-          stepCard.classList.remove("step-locked");
-          stepCard.classList.add("step-cleared");
-          const barrier = stepCard.querySelector(".safety-barrier");
-          if (barrier) barrier.remove();
-        }
-
-        loadStewardQueue();
-      } else {
-        const errPayload = await response.json().catch(() => ({}));
-        alert(errPayload.detail || "Steward sign-off could not be registered.");
-      }
-    } catch (err) {
-      alert("Network error submitting safety sign-off: " + err.message);
-    } finally {
-      closeSafetyModal();
-    }
-  });
-
-  /* ==========================================================================
-     13. STEWARD QUEUE API & ACTIONS
-     ========================================================================== */
-  async function loadStewardQueue(facilityFilter = "all") {
-    const stewardContainer = document.getElementById("steward-queue-container");
-    if (!stewardContainer) return;
-
-    try {
-      let url = "/api/steward/pending-signoffs";
-      if (facilityFilter && facilityFilter !== "all") {
-        url += `?facility=${encodeURIComponent(facilityFilter)}`;
-      }
-
-      const res = await fetch(url);
-      if (!res.ok) return;
-
-      const items = await res.json();
-      if (safetyQueueCount) {
-        safetyQueueCount.textContent = items.length;
-      }
-
-      stewardContainer.innerHTML = "";
-      if (items.length === 0) {
-        const emptyLi = document.createElement("li");
-        emptyLi.className = "queue-item queue-empty";
-        emptyLi.innerHTML = `
-          <article class="steward-card">
-            <p class="queue-risk-brief">Zero pending safety sign-offs in queue for the selected facility. Shop floor is clear.</p>
-          </article>
-        `;
-        stewardContainer.appendChild(emptyLi);
-        return;
-      }
-
-      items.forEach((item) => {
-        const li = document.createElement("li");
-        const facilityKey = (item.facility || "machine_shop").toLowerCase();
-        li.className = "queue-item";
-        li.dataset.facility = facilityKey;
-
-        li.innerHTML = `
-          <article class="steward-card">
-            <header class="card-header-bar">
-              <span class="facility-badge">[${escapeHtml(facilityKey.toUpperCase())}]</span>
-              <time class="card-timestamp">REQUIRES ATTENTION</time>
-            </header>
-            <h3 class="queue-operation-title">${escapeHtml(item.title)}</h3>
-            <p class="queue-student-meta">
-              Student: <strong>${escapeHtml(item.student_name)}</strong> &bull; Project: <em>${escapeHtml(item.project_title)}</em> &bull; Step: <kbd>OP ${escapeHtml(String(item.step_order).padStart(2, "0"))}</kbd>
-            </p>
-            <p class="queue-risk-brief">
-              <strong>Instructions:</strong> ${escapeHtml(item.instructions)}
-              ${item.safety_notes ? `<br><strong>Safety Notes:</strong> ${escapeHtml(item.safety_notes)}` : ""}
-            </p>
-            <footer class="queue-card-actions">
-              <button type="button" class="btn-steward-approve" data-step-id="${escapeHtml(String(item.step_id))}" data-step-title="${escapeHtml(item.title)}" data-facility="${escapeHtml(facilityKey)}">
-                APPROVE SIGN-OFF
-              </button>
-              <button type="button" class="btn-steward-flag" data-step-id="${escapeHtml(String(item.step_id))}" data-step-title="${escapeHtml(item.title)}" data-facility="${escapeHtml(facilityKey)}">
-                FLAG SAFETY CONCERN
-              </button>
-            </footer>
-          </article>
-        `;
-        stewardContainer.appendChild(li);
-      });
-    } catch (err) {
-      console.warn("Could not load steward queue:", err);
-    }
-  }
-
-  const stewardQueueContainer = document.getElementById("steward-queue-container");
-  stewardQueueContainer?.addEventListener("click", async (e) => {
-    const approveBtn = e.target.closest(".btn-steward-approve");
-    if (approveBtn) {
-      const stepId = approveBtn.dataset.stepId;
-      const stepTitle = approveBtn.dataset.stepTitle;
-      const facility = approveBtn.dataset.facility;
-      openSafetyModal(stepId, stepTitle, facility);
-      return;
-    }
-
-    const flagBtn = e.target.closest(".btn-steward-flag");
-    if (flagBtn) {
-      const stepId = flagBtn.dataset.stepId;
-      const stepTitle = flagBtn.dataset.stepTitle || "Operation";
-      const reason = prompt(
-        `Enter safety hazard or reason for flagging "${stepTitle}":`,
-        "Fixture rigidity insufficient / missing eye protection"
-      );
-      if (!reason || !reason.trim()) return;
-
-      const stewardId = await ensureStewardUser();
-      try {
-        const response = await fetch(`/api/steps/${stepId}/flag-safety`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            steward_id: stewardId || 2,
-            reason: reason.trim(),
-          }),
-        });
-        if (response.ok) {
-          alert(`Flagged step: "${stepTitle}". Notification recorded.`);
-          loadStewardQueue();
-        } else {
-          const errPayload = await response.json().catch(() => ({}));
-          alert(errPayload.detail || "Could not record safety flag.");
-        }
-      } catch (err) {
-        alert("Failed to flag safety concern: " + err.message);
-      }
-    }
-  });
-
-  queueFilterBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      queueFilterBtns.forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      const filter = btn.dataset.queueFilter || "all";
-      loadStewardQueue(filter);
-    });
   });
 
   /* ==========================================================================
@@ -1571,8 +1197,7 @@
     }
 
     try {
-      const stewardId = await ensureStewardUser();
-      const res = await fetch(`/api/inventory/upload-csv?steward_id=${stewardId || 2}`, {
+      const res = await fetch("/api/inventory/upload-csv", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(csvContent),

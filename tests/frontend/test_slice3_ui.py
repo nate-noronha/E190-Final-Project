@@ -388,11 +388,10 @@ def test_bom_table_semantic_structure():
 
 
 def test_high_contrast_progress_elements():
-    """Assert high-contrast <progress> elements exist for generation and chat."""
+    """Assert high-contrast <progress> element exists for chat."""
     content = TEMPLATE_PATH.read_text(encoding="utf-8")
     collector = StrictTagCollector()
     collector.feed(content)
 
     assert "progress" in collector.tags
-    assert "generation-progress" in collector.element_ids
     assert "chat-progress" in collector.element_ids
