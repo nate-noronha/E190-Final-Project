@@ -189,6 +189,12 @@ def test_honest_error_banner_elements_in_template():
     collector = StrictTagCollector()
     collector.feed(content)
 
+    # Generation alert banner
+    assert "generation-alert" in collector.element_ids
+    assert "generation-alert-title" in collector.element_ids
+    assert "generation-alert-message" in collector.element_ids
+    assert "btn-retry-generate" in collector.element_ids
+
     # Chat alert banner
     assert "chat-alert-box" in collector.element_ids
     assert "chat-alert-title" in collector.element_ids

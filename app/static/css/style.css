@@ -633,6 +633,46 @@ select:focus-visible {
   max-width: 240px;
 }
 
+/* Center View Segmented Pill (HeroUI tabs look) */
+.center-view-switcher {
+  display: flex;
+  align-items: center;
+}
+
+.segmented-pill-list {
+  display: inline-flex;
+  list-style: none;
+  background-color: var(--make-surface-1);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  gap: 2px;
+  box-shadow: var(--shadow-small);
+}
+
+.seg-pill {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.35rem 0.9rem;
+  min-height: 36px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--make-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.seg-pill:hover {
+  color: var(--make-text);
+}
+
+.seg-pill.active {
+  background-color: var(--make-gold);
+  color: #000000;
+  box-shadow: var(--shadow-glow);
+}
+
 /* Topbar Right Drawer Toggle Button (like make.hmc.edu "Locations" pill) */
 .topbar-right {
   display: flex;
@@ -807,7 +847,11 @@ select:focus-visible {
   color: rgba(0, 0, 0, 0.72);
 }
 
-/* Forms */
+/* Collapsible Project Brief Form */
+.project-brief-form.is-collapsed {
+  display: none;
+}
+
 .stark-form {
   width: 100%;
 }
@@ -1309,10 +1353,6 @@ select:focus-visible {
   white-space: pre-wrap;
 }
 
-.chat-text + .chat-text {
-  margin-top: 0.85rem;
-}
-
 /* Markdown tables rendered inside assistant chat replies */
 .chat-table {
   margin: 0.75rem 0;
@@ -1367,6 +1407,29 @@ select:focus-visible {
   border-color: var(--make-gold);
 }
 
+.btn-prompt-plus {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--make-surface-200);
+  color: var(--make-text);
+  font-size: 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.btn-prompt-plus:hover,
+.btn-prompt-plus[aria-expanded="true"] {
+  background-color: var(--make-gold);
+  color: #000000;
+}
+
 .chat-textarea {
   flex: 1;
   min-width: 0;
@@ -1391,6 +1454,26 @@ select:focus-visible {
 
 .chat-textarea:focus-visible {
   outline: none;
+}
+
+.btn-quick-decompose {
+  min-height: 38px;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-pill);
+  border: none;
+  background-color: var(--make-surface-200);
+  color: var(--make-gold);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-quick-decompose:hover {
+  background-color: var(--make-gold);
+  color: #000000;
 }
 
 .chat-submit-btn {
@@ -2491,6 +2574,10 @@ select:focus-visible {
    ========================================================================== */
 
 @media (max-width: 639px) {
+  .btn-quick-decompose {
+    display: none;
+  }
+
   .hero-wordmark {
     font-size: 4rem;
   }
@@ -2546,6 +2633,11 @@ select:focus-visible {
   .topbar-project-title {
     max-width: 145px;
     font-size: 0.9rem;
+  }
+
+  .seg-pill {
+    padding: 0.3rem 0.65rem;
+    font-size: 0.78rem;
   }
 
   .btn-drawer-toggle {
