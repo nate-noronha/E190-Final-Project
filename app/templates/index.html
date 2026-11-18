@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Lexend:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/style.css?v=6">
-  <script src="/static/js/app.js?v=6" defer></script>
+  <link rel="stylesheet" href="/static/css/style.css?v=7">
+  <script src="/static/js/app.js?v=7" defer></script>
 </head>
 <body class="app-shell">
 
@@ -95,20 +95,6 @@
         <span id="topbar-project-title" class="topbar-project-title">New Project</span>
       </section>
 
-      <nav class="center-view-switcher" aria-label="Workspace View Switcher">
-        <ul class="segmented-pill-list">
-          <li>
-            <button type="button" class="seg-pill active" id="btn-view-stream" data-center-view="stream">
-              Chat &amp; Steps
-            </button>
-          </li>
-          <li>
-            <button type="button" class="seg-pill" id="btn-view-brief" data-center-view="brief">
-              Project Brief
-            </button>
-          </li>
-        </ul>
-      </nav>
 
       <section class="topbar-right">
         <button type="button" id="btn-toggle-right-drawer" class="btn-drawer-toggle" aria-expanded="false" aria-controls="right-tools-drawer">
@@ -129,39 +115,6 @@
         <h2 class="watts-hero-heading">Ready when you are.</h2>
         <p class="watts-hero-sub">Describe your hardware prototype below to get started.</p>
       </section>
-
-      <!-- COLLAPSIBLE PROJECT SPECIFICATION BRIEF FORM -->
-      <form id="project-form" class="stark-form project-brief-form is-collapsed" onsubmit="return false;">
-        <fieldset class="stark-fieldset">
-          <legend class="stark-legend">PROTOTYPE SPECIFICATION BRIEF</legend>
-          <p class="fieldset-notice">
-            Zero automated LLM queries on page load. Generation triggers solely upon explicit student button dispatch.
-          </p>
-
-          <!-- Honest Error Alert Box -->
-          <aside class="stark-alert-box" id="generation-alert" role="alert" hidden>
-            <header class="alert-header">
-              <span class="alert-icon" aria-hidden="true">&#9888;</span>
-              <strong class="alert-title" id="generation-alert-title">GENERATION FAILED</strong>
-            </header>
-            <p class="alert-message" id="generation-alert-message"></p>
-            <button type="button" class="btn-alert-retry" id="btn-retry-generate">RETRY</button>
-          </aside>
-
-          <progress id="generation-progress" class="stark-progress" value="0" max="100" aria-label="Step generation progress" hidden></progress>
-
-          <label for="project-title-input" class="stark-label">PROJECT TITLE</label>
-          <input type="text" id="project-title-input" name="title" class="stark-input" value="" placeholder="e.g., Autonomous Solar Sun-Tracker Gimbal" required>
-
-          <label for="project-desc-input" class="stark-label">ENGINEERING CONSTRAINTS &amp; TARGET TOLERANCES</label>
-          <textarea id="project-desc-input" name="description" class="stark-textarea" rows="3" placeholder="Specify machining materials (6061-T6 Aluminum, Delrin, PLA), angular backlash (&plusmn;0.05&deg;), and required machinery..."></textarea>
-
-          <button type="button" id="btn-generate-steps" class="btn-action-primary">
-            DECOMPOSE INTO MANUFACTURING PLAN &rarr;
-          </button>
-          <p id="copilot-action-status" class="action-status-pill" role="status" aria-live="polite">Ready for student dispatch.</p>
-        </fieldset>
-      </form>
 
       <!-- MANUFACTURING STEP READER (hidden until steps are generated) -->
       <section class="manufacturing-flow" aria-label="Manufacturing Step Reader">
@@ -212,18 +165,14 @@
       <form id="chat-form" class="stark-form chat-input-form chatgpt-prompt-bar" onsubmit="return false;">
         <fieldset class="stark-fieldset chat-fieldset">
           <legend class="sr-only">Ask Fabrication Assistant</legend>
-          <button type="button" id="btn-toggle-brief" class="btn-prompt-plus" title="Toggle Full Project Specification Brief" aria-label="Toggle Full Project Specification Brief" aria-expanded="false">+</button>
           <label for="chat-input" class="stark-label sr-only">YOUR QUESTION</label>
           <textarea id="chat-input" name="message" class="stark-textarea chat-textarea" rows="1" placeholder="Ask anything about your build, or describe a new project..." required></textarea>
-          <button type="button" id="btn-quick-decompose" class="btn-quick-decompose" title="Create and decompose a new manufacturing plan from prompt">
-            Decompose Plan
-          </button>
           <button type="button" id="btn-send-chat" class="btn-action-primary chat-submit-btn" aria-label="Dispatch query">
             <span class="sr-only">DISPATCH QUERY</span>
             <span aria-hidden="true">&uarr;</span>
           </button>
         </fieldset>
-        <p id="chat-action-status" class="action-status-pill chat-status-pill" role="status" aria-live="polite">Chat ready for questions &bull; Use "+" for detailed brief or "Decompose Plan" to generate steps.</p>
+        <p id="chat-action-status" class="action-status-pill chat-status-pill" role="status" aria-live="polite">Chat ready &bull; Describe your build or ask a question.</p>
       </form>
     </footer>
   </main>
