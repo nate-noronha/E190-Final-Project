@@ -119,38 +119,13 @@ class ErrorResponse(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Steward Safety Sign-off DTOs
+# Step DTOs
 # ---------------------------------------------------------------------------
-
-
-class StewardSignoffRequest(BaseModel):
-    steward_id: int
-    notes: Optional[str] = None
-
-
-class StewardFlagRequest(BaseModel):
-    steward_id: int
-    reason: str
 
 
 class StepCompleteToggle(BaseModel):
     student_id: int
     is_completed: bool
-
-
-class PendingSignoffRead(BaseModel):
-    step_id: int
-    project_id: int
-    project_title: str
-    student_id: int
-    student_name: str
-    step_order: int
-    subsystem: SubsystemEnum
-    facility: Optional[FacilityEnum] = None
-    title: str
-    instructions: str
-    safety_notes: Optional[str] = None
-    safety_level: SafetyLevelEnum
 
 
 # ---------------------------------------------------------------------------

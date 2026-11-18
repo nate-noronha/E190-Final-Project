@@ -3,15 +3,14 @@ Frontend UI test suite for the Harvey Mudd E190 Prototyping Assistant.
 
 Verifies:
 1. Pure Semantic HTML5 with ZERO <div> tags (audit both template and GET / response).
-2. Key semantic landmarks exist (<header>, <nav>, <main>, <section>, <article>, <dialog>, <footer>, <aside>, <figure>, <table>, <form>).
+2. Key semantic landmarks exist (<header>, <nav>, <main>, <section>, <article>, <footer>, <aside>, <figure>, <table>, <form>).
 3. Viewport meta tag is configured mobile-first (width=device-width, initial-scale=1.0).
 4. GET / returns 200 OK with Content-Type text/html.
 5. Page load makes 0 calls to any LLM service.
-6. Role switcher present with Student and Steward options.
-7. Safety modal dialog (<dialog id="safety-modal">) with semantic form & checklist.
-8. All 4 navigation tabs and 4 HMC facilities represented.
-9. Static assets (/static/css/style.css, /static/js/app.js) mounted and reachable.
-10. Stark Greek design system CSS rules (B&W palette, serif headings, >=44px touch targets).
+6. All 3 navigation tabs and 4 HMC facilities represented.
+7. No steward sign-off UI (role switcher, queue tab, safety dialog).
+8. Static assets (/static/css/style.css, /static/js/app.js) mounted and reachable.
+9. Stark Greek design system CSS rules (B&W palette, serif headings, >=44px touch targets).
 """
 import re
 import sys
@@ -121,7 +120,6 @@ def test_key_semantic_landmarks_present():
         "main",
         "section",
         "article",
-        "dialog",
         "footer",
         "aside",
         "figure",
@@ -189,25 +187,13 @@ def test_page_load_makes_zero_llm_calls(client: TestClient, monkeypatch):
     assert call_log == [], f"LLM was invoked during page load: {call_log}"
 
 
-def test_role_switcher_structure():
-    """Assert stark role switcher (Student vs Steward) is present and accessible."""
-    content = TEMPLATE_PATH.read_text(encoding="utf-8")
-    assert 'value="student"' in content
-    assert 'value="steward"' in content
-    assert "role-switcher-fieldset" in content
-    assert "[STUDENT]" in content
-    assert "[STEWARD]" in content
-
-
-def test_four_navigation_tabs_present():
-    """Assert all 4 primary architectural navigation tabs are present in markup."""
+def test_three_navigation_tabs_present():
+    """Assert all 3 primary architectural navigation tabs are present in markup."""
     content = TEMPLATE_PATH.read_text(encoding="utf-8")
     assert "tab-copilot" in content
-    assert "tab-steward" in content
     assert "tab-stockroom" in content
     assert "tab-cad" in content
     assert "PROJECT CO-PILOT" in content
-    assert "STEWARD QUEUE" in content
     assert "CAMPUS STOCKROOM" in content
     assert "3D CAD PREVIEW" in content
 
@@ -225,20 +211,14 @@ def test_four_hmc_facilities_represented():
         assert fac in content, f"Facility badge {fac} missing from template markup"
 
 
-def test_safety_modal_dialog_semantic():
-    """Assert <dialog id='safety-modal'> exists with semantic form controls."""
+def test_no_steward_signoff_ui():
+    """Assert steward sign-off UI (role switcher, queue tab, safety dialog) has been removed."""
     content = TEMPLATE_PATH.read_text(encoding="utf-8")
-    collector = SemanticTagCollector()
-    collector.feed(content)
-
-    assert "safety-modal" in collector.element_ids
-    assert "dialog" in collector.tags
-    assert 'method="dialog"' in content or 'id="dialog-signoff-form"' in content
-    assert 'type="checkbox"' in content
-    assert "chk-ppe" in collector.element_ids
-    assert "chk-fixture" in collector.element_ids
-    assert "chk-speeds" in collector.element_ids
-    assert "chk-estop" in collector.element_ids
+    js = JS_PATH.read_text(encoding="utf-8") if JS_PATH.exists() else ""
+    for marker in ("role-switcher-fieldset", "tab-steward", "safety-modal", 'value="steward"'):
+        assert marker not in content, f"{marker} should no longer be in the template"
+    for marker in ("/api/steward/", "approve-safety", "flag-safety"):
+        assert marker not in js, f"{marker} should no longer be referenced in app.js"
 
 
 def test_static_assets_mounted_and_served(client: TestClient):
